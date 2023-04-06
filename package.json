@@ -1,0 +1,41 @@
+{
+  "name": "codeceptjs-xray-cloud-helper",
+  "version": "2.0.0",
+  "private": false,
+  "description": "Import test results to Xray",
+  "author": "csaadi",
+  "license": "MIT",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:saadichouaib/codeceptjs-xray-cloud-helper.git"
+  },
+  "keywords": [
+    "codeceptjs",
+    "jira",
+    "xray",
+    "cloud",
+    "report"
+  ],
+  "bin": {
+    "xray-import": "./bin/cli.js"
+  },
+  "scripts": {
+    "test": "jest --verbose"
+  },
+  "dependencies": {
+    "@faker-js/faker": "^7.6.0",
+    "axios": "^1.2.2",
+    "axios-form-data": "^1.1.1",
+    "chalk": "^4.1.2",
+    "codeceptjs": "^3.3.7",
+    "commander": "^9.5.0",
+    "inquirer": "^8.0.0",
+    "jest": "^29.3.1",
+    "joi": "^17.7.0",
+    "jsonschema": "^1.4.1",
+    "loading-cli": "^1.1.0",
+    "moment": "^2.29.4",
+    "process": "^0.11.10"
+  }
+}

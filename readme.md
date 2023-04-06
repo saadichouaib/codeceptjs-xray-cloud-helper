@@ -2,7 +2,7 @@
 
 ## Context
 
-**codeceptjs-xray-cloud-helper** is a [CodeceptJS](https://codecept.io/) CodeceptJS plugin that automatically retrieves the result of CodeceptJS tests and sends them to XRAY/JIRA via [XRAY Cloud API](https://docs.getxray.app/display/XRAYCLOUD/Import+Execution+Results+-+REST+v2#ImportExecutionResultsRESTv2-XrayJSONresults).
+**codeceptjs-xray-cloud-helper** is a [CodeceptJS](https://codecept.io/) plugin that automatically retrieves the result of CodeceptJS tests and sends them to XRAY/JIRA via [XRAY Cloud API](https://docs.getxray.app/display/XRAYCLOUD/Import+Execution+Results+-+REST+v2#ImportExecutionResultsRESTv2-XrayJSONresults).
 
 **Works Only with XRAY/JIRA cloud version.**
 

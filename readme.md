@@ -4,7 +4,7 @@
 
 ## Context
 
-**codeceptjs-xray-cloud-helper** is a [CodeceptJS](https://codecept.io/) plugin that automatically retrieves the result of CodeceptJS tests and sends them to XRAY/JIRA via [XRAY Cloud API](https://docs.getxray.app/display/XRAYCLOUD/Import+Execution+Results+-+REST+v2#ImportExecutionResultsRESTv2-XrayJSONresults).
+**codeceptjs-xray-cloud-helper** is a [CodeceptJS](https://codecept.io/) plugin that automatically retrieves the results of CodeceptJS tests and sends them to XRAY/JIRA via [XRAY Cloud API](https://docs.getxray.app/display/XRAYCLOUD/Import+Execution+Results+-+REST+v2#ImportExecutionResultsRESTv2-XrayJSONresults).
 
 **Works Only with XRAY/JIRA cloud version.**
 
@@ -264,7 +264,7 @@ plugins: {
 }
 ```
 
-### Résultat
+### Results
 
 Below are some examples of importing failed tests with screenshots and error messages injected into the comment of the test run.
 
@@ -274,7 +274,7 @@ Below are some examples of importing failed tests with screenshots and error mes
 #### Manual test
 ![Test Execution view of failed manual test](./docs/manual_failed.png)
 
-#### Manual avec itérations
+#### Manual with iterations
 ![Test Execution view of failed manual with iterations test](./docs/manual_iterations_failed.png)
 
 #### Cucumber scenario
@@ -291,7 +291,7 @@ One of the possible uses of this helper is the automatic creation of test ticket
 
 - Start by modifying the configuration on `codecept.conf.js` in the `plugins.xrayImport` section as follows :
 
-The **"projectKey"** is mandatory when **createNewJiraTest** is true. 
+The **"projectKey"** is mandatory when `createNewJiraTest: true`. 
 ```
 {
     projectKey: "JIRAKEY",
@@ -331,8 +331,8 @@ Scenario('[Auto created test] Manual test - Passed', async({ I }) => {
 - Now, all that remains is to add the @TEST_ tag to the Codecept scenario corresponding to the Jira ticket that has just been created to avoid creating another duplicate ticket during the next execution
 
 **Note:** 
-- The helper will try to create a Jira test ticket only if the codecept scenario does not have a @TEST_ tag and `createNewJiraTest: true`
-- If the codecept scenario does not have a @TEST_ tag and `createNewJiraTest: false` in the config, the scenario result will be simply ignored during the import
+- The helper will try to create a Jira test ticket only if the codecept scenario does not have a `@TEST_` tag and `createNewJiraTest: true`
+- If the codecept scenario does not have a `@TEST_` tag and `createNewJiraTest: false` in the config, the scenario result will be simply ignored during the import
 
 ### Cucumber tests
 
@@ -361,9 +361,9 @@ For more information, please see the complete documentation: [doc xray](https://
 In the example below:
 
 - A precondition will be created because **Background** is not annotated
-- The JIRAKEY-1138 test will be modified on Jira
+- The `JIRAKEY-1138` test will be modified on Jira
 - The `Cucumber scenario test failed` scenario will be created on Jira, and the `login` tag will be added as a label
-- All tests will be linked to the JIRAKEY-989 user story and to the created precondition
+- All tests will be linked to the `JIRAKEY-989` user story and to the created precondition
 
 ```gherkin
 @REQ_JIRAKEY-989
@@ -405,7 +405,7 @@ npx xray-import cucumber
 
 ## Results
 
-Once the configuration is set up and the @TEST_ tags are in place, we can run the codeceptJS tests.
+Once the configuration is set up and the `@TEST_` tags are in place, we can run the codeceptJS tests.
 
 A validation of the helper's configuration is performed using the conf_schema_checker.
 

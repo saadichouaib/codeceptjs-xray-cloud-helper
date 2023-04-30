@@ -1,23 +1,25 @@
 name: Test
+
 on:
   push:
-    path-ignore:
+    paths-ignore:
       - 'docs/**'
+      - 'README.md'
       - 'LICENSE'
-      - 'readme.md'
       - '.editorconfig'
     branches:
-      - github-ci-impl-for-deployment-and-testing
-      - develop
-    pull_request:
-      paths-ignore:
-        - 'docs/**'
-        - 'README.md'
-        - 'LICENSE'
-        - '.editorconfig'
-      branches:
-        - main
-        - master
+      - main
+      - master
+  pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - 'README.md'
+      - 'LICENSE'
+      - '.editorconfig'
+    branches:
+      - main
+      - master
+
 jobs:
   test:
     runs-on: ${{ matrix.os }}
@@ -28,13 +30,14 @@ jobs:
           - windows-latest
           - macos-latest
         node: [16.x, 18.x]
-  steps:
-    - uses: actions/checkout@v3
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: ${{ matrix.node }}
-    - name: Install modules
-      run: yarn
-    - name: Run tests
-      run: yarn test
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Install modules
+        run: yarn
+      - name: Run tests
+        run: yarn test

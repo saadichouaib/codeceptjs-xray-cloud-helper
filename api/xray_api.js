@@ -4,6 +4,7 @@ const colors = require('chalk');
 const process = require('process');
 const loading = require('loading-cli');
 const fs = require('fs');
+const api_errors = require('./api_errors');
 let load_auth;
 let load_import_execute;
 let load_import_cucumber;
@@ -35,19 +36,7 @@ module.exports = {
             response = await axios.post(`${xray_url}/api/v2/authenticate`, body, {headers: headers, timeout: timeout});
         } catch (error) {
             load_auth.stop();
-            let errorMessage = "";
-            if (error.response) {
-                // Request made but the server responded with an error
-                errorMessage = error.response.data
-                console.debug(error.response.status);
-                console.debug(error.response.headers);
-            } else if (error.request) {
-                // Request made but no response is received from the server.
-                errorMessage = "No response from the server : " + error.request;
-            } else {
-                // Error occured while setting up the request
-                errorMessage = 'Error' + error.message;
-            }
+            const errorMessage = api_errors.handle_axios_error(error);
             console.error(`Authentication error while importing Xray results, reason :\n`, errorMessage);
             process.exit(1);
         }

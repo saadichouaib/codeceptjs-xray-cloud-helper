@@ -33,9 +33,22 @@ module.exports = {
         try {
             load_auth = loading("Authentication ...").start();
             response = await axios.post(`${xray_url}/api/v2/authenticate`, body, {headers: headers, timeout: timeout});
-        } catch (err) {
+        } catch (error) {
             load_auth.stop();
-            console.error(`Authentication error while importing Xray results, reason :\n`, err.response.data);
+            let errorMessage = "";
+            if (error.response) {
+                // Request made but the server responded with an error
+                errorMessage = error.response.data
+                console.debug(error.response.status);
+                console.debug(error.response.headers);
+            } else if (error.request) {
+                // Request made but no response is received from the server.
+                errorMessage = "No response from the server : " + error.request;
+            } else {
+                // Error occured while setting up the request
+                errorMessage = 'Error' + error.message;
+            }
+            console.error(`Authentication error while importing Xray results, reason :\n`, errorMessage);
             process.exit(1);
         }
 

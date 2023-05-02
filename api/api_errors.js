@@ -6,7 +6,9 @@ module.exports = {
      */
     handle_axios_error(error) {
         let errorMessage = {};
-        console.debug("Iitial error : ",error);
+        // Sanitizing error message from sensitive data
+        error.message = error.message.replace(/("client_id":"[^"]+",|"client_secret":"[^"]+")/g, '"<hidden>"');
+        console.debug("Initial error : ",error);
         if (error.response) {
             // Request made but the server responded with an error
             errorMessage = error.response.data
@@ -14,6 +16,7 @@ module.exports = {
             console.debug(error.response.headers);
         } else if (error.request) {
             // Request made but no response is received from the server.
+
             errorMessage = {
                 message : "No response from the server : ",
                 error

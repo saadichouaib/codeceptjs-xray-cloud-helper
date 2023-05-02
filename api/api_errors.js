@@ -1,13 +1,13 @@
 module.exports = {
     /**
-     * 
+     * Handle axios errors
      * @param {Error | *} error 
      * @returns 
      */
     handle_axios_error(error) {
         let errorMessage = {};
         // Sanitizing error message from sensitive data
-        error.message = error.message.replace(/("client_id":"[^"]+",|"client_secret":"[^"]+")/g, '"<hidden>"');
+        error = this.sanitize_error(error);
         console.debug("Initial error : ",error);
         if (error.response) {
             // Request made but the server responded with an error
@@ -29,5 +29,20 @@ module.exports = {
             };
         }
         return errorMessage;
+    },
+    /**
+     * 
+     * @param {*} error 
+     * @returns 
+     */
+    sanitize_error(error){
+        if (error.message) {
+            error.message = error.message.replace(/("client_id":"[^"]+",|"client_secret":"[^"]+")/g, '"<hidden>"');
+        }
+        if (error.config && error.config.data) {
+            error.config.data = error.config.data.replace(/"client_id":"[^"]+"/g, '"client_id":"*****"');
+            error.config.data = error.config.data.replace(/"client_secret":"[^"]+"/g, '"client_secret":"*****"');
+        }
+        return error;
     }
 }

@@ -8,15 +8,11 @@ module.exports = {
         let errorMessage = {};
         // Sanitizing error message from sensitive data
         error = this.sanitize_error(error);
-        console.debug("Initial error : ",error);
         if (error.response) {
             // Request made but the server responded with an error
             errorMessage = error.response.data
-            console.debug(error.response.status);
-            console.debug(error.response.headers);
         } else if (error.request) {
             // Request made but no response is received from the server.
-
             errorMessage = {
                 message : "No response from the server : ",
                 error

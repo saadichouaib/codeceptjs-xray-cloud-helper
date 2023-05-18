@@ -4,6 +4,7 @@ const colors = require('chalk');
 const process = require('process');
 const loading = require('loading-cli');
 const fs = require('fs');
+const api_errors = require('./api_errors');
 let load_auth;
 let load_import_execute;
 let load_import_cucumber;
@@ -33,9 +34,10 @@ module.exports = {
         try {
             load_auth = loading("Authentication ...").start();
             response = await axios.post(`${xray_url}/api/v2/authenticate`, body, {headers: headers, timeout: timeout});
-        } catch (err) {
+        } catch (error) {
             load_auth.stop();
-            console.error(`Authentication error while importing Xray results, reason :\n`, err.response.data);
+            const errorMessage = api_errors.handle_axios_error(error);
+            console.error(`Authentication error while importing Xray results, reason :\n`, errorMessage);
             process.exit(1);
         }
 
@@ -64,7 +66,8 @@ module.exports = {
             response = await axios.post(`${xray_url}/api/v2/import/execution`, body, {headers: headers, timeout: timeout});
         } catch (err) {
             load_import_execute.stop();
-            console.error(`Error while importing Xray results, reason :\n`, err.response.data);
+            const errorMessage = api_errors.handle_axios_error(err);
+            console.error(`Error while importing Xray results, reason :\n`, errorMessage);
             process.exit(1);
         }
 
@@ -96,7 +99,8 @@ module.exports = {
             response = await axios.post(`${xray_url}/api/v2/import/feature?projectKey=${project_key}`, {file: fs.createReadStream(file_path)}, {headers: headers, timeout: timeout});
         } catch (err) {
             load_import_cucumber.stop();
-            console.error(`\nError while creating/updating Cucumber tests from feature file, reason :\n`, err.cause);
+            const errorMessage = api_errors.handle_axios_error(err);
+            console.error(`\nError while creating/updating Cucumber tests from feature file, reason :\n`, errorMessage);
             process.exit(1);
         }
 

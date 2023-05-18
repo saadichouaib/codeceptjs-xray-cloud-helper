@@ -372,8 +372,8 @@ In the example below:
 Feature: Subscribers see different articles based on their subscription level
 
   Background:
-        Given that the calculator is turned on
-        And the mode is to advanced
+    Given that the calculator is turned on
+    And the mode is to advanced
     
   @TEST_JIRAKEY-1138
   Scenario: Cucumber scenario test
@@ -391,7 +391,7 @@ Feature: Subscribers see different articles based on their subscription level
 The keywords to use in the feature file are:
 
 - `@REQ_`: to be placed before the feature to link tests to a Jira user story
-- `@PRECOND_`: to be placed before the `Background` to link it to a Jira precondition
+- `#@PRECOND_`: to be placed before the `Background` to link it to a Jira precondition
 - `@TEST_`: to be placed before the scenarios/scenario outlines to link them to Jira tests
 
 To import Cucumber tests, run the following command:

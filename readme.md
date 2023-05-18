@@ -8,6 +8,8 @@
 
 **Works Only with XRAY/JIRA cloud version.**
 
+Refer to [hands-on-codeceptjs-xray-cloud-helper](https://github.com/saadichouaib/hands-on-codeceptjs-xray-cloud-helper) to see test examples and how the plugin could be implemented.
+
 ## Setup
 
 ```

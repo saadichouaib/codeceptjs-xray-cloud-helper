@@ -1,6 +1,6 @@
 {
   "name": "codeceptjs-xray-cloud-helper",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "private": false,
   "description": "Import test results to Xray",
   "author": "csaadi",

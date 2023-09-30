@@ -37,6 +37,7 @@ It allows you to:
 - Link the "Test Execution" to a specific test plan
 - Enter all fields of the "Test Execution"
 - Send data to the "custom fields" of the Test Run
+- Send the last result of a scenario if it retries one or more times after a fail
 
 ## Configuration
 Choose between the following two options: **"Quickstart"** ou **"Manual configuration"**.

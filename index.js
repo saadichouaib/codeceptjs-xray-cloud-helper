@@ -64,17 +64,11 @@ module.exports = function (config) {
     //Get results after each test and push it to tests_results[]
     event.dispatcher.on(event.test.after, function (test) {
         recorder.add('Get test results', function () {
-            // Check if current test is a scenario retry
-            const is_retry_test = test?._retriedTest !== undefined;
-
-            //Get test status
-            const status = is_retry_test ? test._retriedTest.state.toUpperCase() : test.state.toUpperCase();
-
             let test_contains_examples = false;
             let test_contains_iterations = false;
 
             //Get tag from test, this tag will be used as a testKey in the api to link the test execution with a JIRA test (if createNewJiraTest is false)
-            const test_tags = is_retry_test ? test._retriedTest.tags : test.tags;
+            const test_tags = common.get_test_tags(test);
 
             test_tags.every(tag => {
                 if (tag.toString().includes("@TEST_")) {
@@ -93,7 +87,7 @@ module.exports = function (config) {
 
             //Update comment array if test failed
             //Update evidences array if config.testExecutionSendEvidenceOnFail is true
-            const test_state = is_retry_test ? test._retriedTest.state : test.state;
+            const test_state = common.get_test_state(test);
 
             if (test_state === "failed") {
                 test_comment.push(common.get_err_string(test));
@@ -102,15 +96,15 @@ module.exports = function (config) {
 
             //Check if actual test is BDD or normal test
             const is_bdd = test.file.includes(`.feature`);
-            [bdd_examples, test_comment, test_evidences] = bdd.save_bdd_results(is_bdd, tests_results, bdd_examples, test_key, test_comment, test_evidences, test_contains_examples, test, status, config);
+            [bdd_examples, test_comment, test_evidences] = bdd.save_bdd_results(is_bdd, tests_results, bdd_examples, test_key, test_comment, test_evidences, test_contains_examples, test, test_state, config);
 
             //Check if actual test is manual or data driven test
             const is_manual = manual_steps_results.length > 1 && !is_bdd;
-            [manual_steps_results, iterations_array, iteration_number, test_comment, test_evidences] = manual.save_manual_results(is_manual, tests_results, manual_steps_results, iterations_array, manual_iteration, iteration_number, test_key, test_comment, test_evidences, test_contains_iterations, test, status, config);
+            [manual_steps_results, iterations_array, iteration_number, test_comment, test_evidences] = manual.save_manual_results(is_manual, tests_results, manual_steps_results, iterations_array, manual_iteration, iteration_number, test_key, test_comment, test_evidences, test_contains_iterations, test, test_state, config);
 
             //Check if actual test is generic
             const is_generic = !is_manual && !is_bdd;
-            generic.save_generic_results(is_generic, tests_results, test_key, test_comment, test_evidences, test, config);
+            generic.save_generic_results(is_generic, tests_results, test_key, test_comment, test_evidences, test, config, test_state);
         });
     });
 
@@ -180,6 +174,6 @@ module.exports = function (config) {
         const response = await xray_api.execute_import(config.xrayCloudUrl, import_execution_data, token, config.timeout);
 
         if (config.debug) output.print(`Response FROM XRAY API: \n${JSON.stringify(response.data, null, 2)}`);
-        if (response.status === 200) output.print(`\n> Tests results were sent to XRAY on TestExecution : ${response.data.key}\n`);
+        if (response.status === 200) output.print(`\n> Tests results from ${import_execution_data.tests.length} tests were sent to XRAY on TestExecution : ${response.data.key}\n`);
     });
 };

@@ -56,7 +56,7 @@ module.exports = function (config) {
     //If test contains manual steps save status of each step
     event.dispatcher.on(event.step.finished, (step) => {
         //Check if actual test contains manual test integration and save each step status
-        if(!step.test?.file?.includes(`.feature`)) {
+        if (!step.test?.file?.includes(`.feature`)) {
             manual.save_steps_status(step, manual_steps_results);
         }
     });
@@ -64,14 +64,13 @@ module.exports = function (config) {
     //Get results after each test and push it to tests_results[]
     event.dispatcher.on(event.test.after, function (test) {
         recorder.add('Get test results', function () {
-            //Get test status
-            const status = test.state.toUpperCase();
-
             let test_contains_examples = false;
             let test_contains_iterations = false;
 
             //Get tag from test, this tag will be used as a testKey in the api to link the test execution with a JIRA test (if createNewJiraTest is false)
-            test.tags.every(tag => {
+            const test_tags = common.get_test_tags(test);
+
+            test_tags.every(tag => {
                 if (tag.toString().includes("@TEST_")) {
                     test_key = tag.split("@TEST_")[1];
                     return false;
@@ -82,28 +81,30 @@ module.exports = function (config) {
             });
 
             //Reset evidences array if test is neither manual with iterations nor bdd with examples
-            if(tests_results[tests_results.length - 1]?.test_key !== test_key){
+            if (tests_results[tests_results.length - 1]?.test_key !== test_key) {
                 test_evidences = [];
             }
 
             //Update comment array if test failed
             //Update evidences array if config.testExecutionSendEvidenceOnFail is true
-            if(test.state === "failed") {
+            const test_state = common.get_test_state(test);
+
+            if (test_state === "failed") {
                 test_comment.push(common.get_err_string(test));
                 if (config.testExecutionSendEvidenceOnFail) test_evidences.push(common.get_evidence_object(test));
             }
 
             //Check if actual test is BDD or normal test
             const is_bdd = test.file.includes(`.feature`);
-            [bdd_examples, test_comment, test_evidences] = bdd.save_bdd_results(is_bdd, tests_results, bdd_examples, test_key, test_comment, test_evidences, test_contains_examples, test, status, config);
+            [bdd_examples, test_comment, test_evidences] = bdd.save_bdd_results(is_bdd, tests_results, bdd_examples, test_key, test_comment, test_evidences, test_contains_examples, test, test_state, config);
 
             //Check if actual test is manual or data driven test
             const is_manual = manual_steps_results.length > 1 && !is_bdd;
-            [manual_steps_results, iterations_array, iteration_number, test_comment, test_evidences] = manual.save_manual_results(is_manual, tests_results, manual_steps_results, iterations_array, manual_iteration, iteration_number, test_key, test_comment, test_evidences, test_contains_iterations, test, status, config);
+            [manual_steps_results, iterations_array, iteration_number, test_comment, test_evidences] = manual.save_manual_results(is_manual, tests_results, manual_steps_results, iterations_array, manual_iteration, iteration_number, test_key, test_comment, test_evidences, test_contains_iterations, test, test_state, config);
 
             //Check if actual test is generic
             const is_generic = !is_manual && !is_bdd;
-            generic.save_generic_results(is_generic, tests_results, test_key, test_comment, test_evidences, test, config);
+            generic.save_generic_results(is_generic, tests_results, test_key, test_comment, test_evidences, test, config, test_state);
         });
     });
 
@@ -133,7 +134,7 @@ module.exports = function (config) {
             //Ignore codecept scenario and dont send its result to JIRA if its tag doesnt start with "@TEST_" and config.createNewJiraTest is false
             //But if @TEST_ tag doesnt exist and config.createNewJiraTest is true, testInfo object is added and Xray will try to create a new test in JIRA
             if (test_result.test_key === "no_xray_tag" && !config.createNewJiraTest) {
-                if(config.debug) output.print(`A test was ignored because its tag doesn\'t start with '@TEST_' and config option 'createNewJiraTest = false'`);
+                if (config.debug) output.print(`A test was ignored because its tag doesn\'t start with '@TEST_' and config option 'createNewJiraTest = false'`);
             } else {
                 tests_data.push(await data_generator.generate_tests_data({
                     testKey: test_result.test_key !== "no_xray_tag" ? test_result.test_key : null,
@@ -151,7 +152,7 @@ module.exports = function (config) {
                     steps: test_result.steps?.length !== 0 ? test_result.steps : null,
                     iterations: test_result.iterations?.length !== 0 ? test_result.iterations : null,
                     evidence: test_result.evidences,
-                    start : test_result.start,
+                    start: test_result.start,
                     finish: test_result.finish,
                     customFields: config.testExecutionCustomFields
                 }));
@@ -163,7 +164,7 @@ module.exports = function (config) {
             await data_generator.build_import_execution_data("existing_test_execution", config.existingTestExecutionKey, info_data, tests_data) :
             await data_generator.build_import_execution_data("new_test_execution", null, info_data, tests_data);
 
-        if(config.debug) output.print(`Send results to JIRA : \n${JSON.stringify(import_execution_data, null, 2)}`);
+        if (config.debug) output.print(`Send results to JIRA : \n${JSON.stringify(import_execution_data, null, 2)}`);
 
         //Validate XRAY execute import body before calling API
         xray_schema_checker.validate(import_execution_data);
@@ -172,7 +173,7 @@ module.exports = function (config) {
         const token = await xray_api.authenticate(config.xrayCloudUrl, config.xrayClientId, config.xraySecret, config.timeout);
         const response = await xray_api.execute_import(config.xrayCloudUrl, import_execution_data, token, config.timeout);
 
-        if(config.debug) output.print(`Response FROM XRAY API: \n${JSON.stringify(response.data, null, 2)}`);
-        if(response.status === 200) output.print(`\n> Tests results were sent to XRAY on TestExecution : ${response.data.key}\n`);
+        if (config.debug) output.print(`Response FROM XRAY API: \n${JSON.stringify(response.data, null, 2)}`);
+        if (response.status === 200) output.print(`\n> Tests results from ${import_execution_data.tests.length} tests were sent to XRAY on TestExecution : ${response.data.key}\n`);
     });
 };

@@ -5,20 +5,20 @@ describe('xray import execution factory', () => {
     it('should return only info and tests objects if testExecutionKey not provided', () => {
 
         const info_data = {
-            project: `POSDEV-${faker.random.numeric(4)}`,
+            project: `POSDEV-${faker.string.numeric(4)}`,
             summary: faker.lorem.lines(1),
             description: faker.lorem.lines(1),
-            version: `${faker.random.numeric(1)}.${faker.random.numeric(1)}`,
-            revision: `${faker.random.numeric(1)}.${faker.random.numeric(1)}`,
-            testPlanKey: `POSDEV-${faker.random.numeric(4)}`,
+            version: `${faker.string.numeric(1)}.${faker.string.numeric(1)}`,
+            revision: `${faker.string.numeric(1)}.${faker.string.numeric(1)}`,
+            testPlanKey: `POSDEV-${faker.string.numeric(4)}`,
             testEnvironments: faker.helpers.arrayElement(['DEV', 'QA', 'STAGE']),
             startDate: faker.date.recent(),
             finishDate: faker.date.recent(),
         };
 
         const tests_data = {
-            testKey: `POSDEV-${faker.random.numeric(4)}`,
-            assignee: faker.random.numeric(7),
+            testKey: `POSDEV-${faker.string.numeric(4)}`,
+            assignee: faker.string.numeric(7),
             status: faker.helpers.arrayElement(["PASSED", "FAILED"]),
             comment: faker.lorem.lines(1),
             start : faker.date.recent(),
@@ -36,23 +36,23 @@ describe('xray import execution factory', () => {
 
     it('should return testExecutionKey, info and tests objects if testExecutionKey is provided', () => {
 
-        const testExecutionKey = `POSDEV-${faker.random.numeric(4)}`;
+        const testExecutionKey = `POSDEV-${faker.string.numeric(4)}`;
 
         const info_data = {
-            project: `POSDEV-${faker.random.numeric(4)}`,
+            project: `POSDEV-${faker.string.numeric(4)}`,
             summary: faker.lorem.lines(1),
             description: faker.lorem.lines(1),
-            version: `${faker.random.numeric(1)}.${faker.random.numeric(1)}`,
-            revision: `${faker.random.numeric(1)}.${faker.random.numeric(1)}`,
-            testPlanKey: `POSDEV-${faker.random.numeric(4)}`,
+            version: `${faker.string.numeric(1)}.${faker.string.numeric(1)}`,
+            revision: `${faker.string.numeric(1)}.${faker.string.numeric(1)}`,
+            testPlanKey: `POSDEV-${faker.string.numeric(4)}`,
             testEnvironments: faker.helpers.arrayElement(['DEV', 'QA', 'STAGE']),
             startDate: faker.date.recent(),
             finishDate: faker.date.recent(),
         };
 
         const tests_data = {
-            testKey: `POSDEV-${faker.random.numeric(4)}`,
-            assignee: faker.random.numeric(7),
+            testKey: `POSDEV-${faker.string.numeric(4)}`,
+            assignee: faker.string.numeric(7),
             status: faker.helpers.arrayElement(["PASSED", "FAILED"]),
             comment: faker.lorem.lines(1),
             start : faker.date.recent(),

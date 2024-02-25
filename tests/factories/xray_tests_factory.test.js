@@ -51,14 +51,14 @@ describe('tests factory', () => {
     it('should return tests object without testInfo when testKey is present', () => {
 
         const body = {
-            testKey: `POSDEV-${faker.random.numeric(4)}`,
+            testKey: `POSDEV-${faker.string.numeric(4)}`,
             examples: null,
             assignee: faker.lorem.word(),
             status: faker.helpers.arrayElement(["PASSED", "FAILED"]),
             comment: faker.lorem.lines(1),
             start: faker.date.recent(),
             finish: faker.date.recent(),
-            executedBy: faker.random.numeric(7)
+            executedBy: faker.string.numeric(7)
         };
 
         const tests_data = xray_tests_factory.get_tests_object(body);
@@ -78,13 +78,13 @@ describe('tests factory', () => {
 
     it('should return valid body when test is neither Cucumber nor Manual (Generic test)', () => {
         const body = {
-            testKey: `POSDEV-${faker.random.numeric(4)}`,
+            testKey: `POSDEV-${faker.string.numeric(4)}`,
             assignee: faker.lorem.word(),
             status: "PASSED",
             comment: faker.lorem.lines(1),
             start: faker.date.recent(),
             finish: faker.date.recent(),
-            executedBy: faker.random.numeric(7)
+            executedBy: faker.string.numeric(7)
         };
 
         const tests_data = xray_tests_factory.get_tests_object(body);
@@ -105,14 +105,14 @@ describe('tests factory', () => {
 
     it('should return valid body when test entry contains examples array (cucumber test)', () => {
         const body = {
-            testKey: `POSDEV-${faker.random.numeric(4)}`,
+            testKey: `POSDEV-${faker.string.numeric(4)}`,
             examples: ["PASSED", "PASSED", faker.helpers.arrayElement(["PASSED", "FAILED"])],
             assignee: faker.lorem.word(),
             status: "PASSED",
             comment: faker.lorem.lines(1),
             start: faker.date.recent(),
             finish: faker.date.recent(),
-            executedBy: faker.random.numeric(7)
+            executedBy: faker.string.numeric(7)
         };
 
         body.status = body.examples.includes("FAILED") ? "FAILED" : "PASSED";
@@ -136,7 +136,7 @@ describe('tests factory', () => {
 
     it('should return valid body when test entry contains steps array (Manual test)', () => {
         const body = {
-            testKey: `POSDEV-${faker.random.numeric(4)}`,
+            testKey: `POSDEV-${faker.string.numeric(4)}`,
             steps: [
                 {
                     status: faker.helpers.arrayElement(["PASSED", "FAILED"]),
@@ -156,7 +156,7 @@ describe('tests factory', () => {
             comment: faker.lorem.lines(1),
             start: faker.date.recent(),
             finish: faker.date.recent(),
-            executedBy: faker.random.numeric(7)
+            executedBy: faker.string.numeric(7)
         };
 
         body.status = body.steps.includes("FAILED") ? "FAILED" : "PASSED";

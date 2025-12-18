@@ -12,7 +12,7 @@ Refer to [hands-on-codeceptjs-xray-cloud-helper](https://github.com/saadichouaib
 
 ## Setup
 
-```
+```sh
 npm install codeceptjs-xray-cloud-helper
 ```
 
@@ -47,7 +47,7 @@ Choose between the following two options: **"Quickstart"** ou **"Manual configur
 
 Use the command line to help you automatically generate the config by answering questions.
 
-```
+```sh
 npx xray-import init
 ```
 
@@ -57,7 +57,7 @@ npx xray-import init
 
 Manually add and modify the following config in the file `codecept.conf.js`.
 
-```
+```js
 plugins: {
     xrayImport: {
         require: "codeceptjs-xray-cloud-helper",
@@ -137,7 +137,7 @@ Scenario('Generic test', ({ I }) => {
 
 To link a codeceptJS test with a Jira Manual test, you must first add the following plugin to `codecept.conf.js`:
 
-```
+```js
 plugins: {
     commentStep: {
       enabled: true,
@@ -254,13 +254,13 @@ Feature: Google Searching
 
 ## Automatic import of screenshots
 
-### Configuration
+### Configuration options
 
 To enable the automatic import of screenshots after a test failure, you must first add the following plugin to `codecept.conf.js` :
 
 It is important to add the `uniqueScreenshotNames` option so that the helper can send multiple screenshots for the same test (in the case of `Scenario outline` and `Manual tests avec itérations`).
 
-```
+```js
 plugins: {
     screenshotOnFail: {
       enabled: true,
@@ -271,7 +271,7 @@ plugins: {
 
 Then you need to activate the option from the xrayImport helper in `codecept.conf.js` :
 
-```
+```js
 plugins: {
     xrayImport: {
       testExecutionSendEvidenceOnFail: true
@@ -295,11 +295,11 @@ Below are some examples of importing failed tests with screenshots and error mes
 
 ![Test Execution view of failed manual with iterations test](./docs/manual_iterations_failed.png)
 
-#### Cucumber scenario
+#### Cucumber scenario (1 example)
 
 ![Test Execution view of failed Cucumber scenario](./docs/cucumber_scenario_failed.png)
 
-#### Cucumber scenario outline
+#### Cucumber scenario outline (1 example)
 
 ![Test Execution view of failed cucumber scenario outline](./docs/cucumber_scenario_outline_failed.png)
 
@@ -313,7 +313,7 @@ One of the possible uses of this helper is the automatic creation of test ticket
 
 The **"projectKey"** is mandatory when `createNewJiraTest: true`.
 
-```
+```js
 {
     projectKey: "JIRAKEY",
     createNewJiraTest: true,
@@ -356,7 +356,7 @@ Scenario('[Auto created test] Manual test - Passed', async({ I }) => {
 - The helper will try to create a Jira test ticket only if the codecept scenario does not have a `@TEST_` tag and `createNewJiraTest: true`
 - If the codecept scenario does not have a `@TEST_` tag and `createNewJiraTest: false` in the config, the scenario result will be simply ignored during the import
 
-### Cucumber tests
+### Cucumber tests (Scenario and Scenario Outline)
 
 Another possible use of this helper is the automatic creation/modification of Cucumber scenarios on Jira from a `.feature` file.
 
@@ -364,7 +364,7 @@ This action can be performed directly with the help of the CLI.
 
 ![xrayImport init](./docs/cli_cucumber.png)
 
-#### Usage
+#### Usage example
 
 First, you need to prepare the feature file that you want to import to Xray/Jira.
 
@@ -416,7 +416,7 @@ The keywords to use in the feature file are:
 
 To import Cucumber tests, run the following command:
 
-```
+```sh
 npx xray-import cucumber
 ```
 
@@ -424,7 +424,7 @@ npx xray-import cucumber
 - Enter the directory that contains the feature files
 - Choose the file that contains the tests we want to create/modify on Jira
 
-## Results
+## Results import
 
 Once the configuration is set up and the `@TEST_` tags are in place, we can run the codeceptJS tests.
 

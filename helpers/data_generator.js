@@ -1,8 +1,8 @@
-const xray_import_execution_factory = require('../factories/xray_import_execution_factory');
-const xray_info_factory = require('../factories/xray_info_factory');
-const xray_tests_factory = require('../factories/xray_tests_factory');
+import xray_import_execution_factory from '../factories/xray_import_execution_factory.js';
+import xray_info_factory from '../factories/xray_info_factory.js';
+import xray_tests_factory from '../factories/xray_tests_factory.js';
 
-module.exports = {
+export default {
 
     /**
      * Generate payload for xray api /api/v2/import/execution
@@ -11,9 +11,9 @@ module.exports = {
      * @param {String} testExecutionKey
      * @param {Object} info_data
      * @param {Array} tests_data
-     * @returns {*}
+     * @returns {Object}
      */
-    build_import_execution_data(scenario,testExecutionKey, info_data, tests_data) {
+    build_import_execution_data(scenario, testExecutionKey, info_data, tests_data) {
         return xray_import_execution_factory.build(scenario, testExecutionKey, info_data, tests_data);
     },
 
@@ -36,4 +36,4 @@ module.exports = {
     generate_tests_data(tests_data_custom) {
         return xray_tests_factory.get_tests_object(tests_data_custom);
     },
-}
+};

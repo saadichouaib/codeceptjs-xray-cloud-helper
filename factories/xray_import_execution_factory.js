@@ -1,5 +1,7 @@
-
-const import_execution_factory = () => ({
+/**
+ * Factory to build the payload for Xray execution import
+ */
+const import_execution_factory = {
 
     /**
      * Get payload for /api/v2/import/execution
@@ -20,21 +22,33 @@ const import_execution_factory = () => ({
             case "new_test_execution":
                 import_execution_data = new_test_execution(info_data, tests_data);
                 break;
+            default:
+                // Fallback for unexpected scenarios
+                import_execution_data = new_test_execution(info_data, tests_data);
         }
         return import_execution_data;
     }
-});
+};
 
+/**
+ * Build payload for an already existing Test Execution in Jira
+ */
 const existing_test_execution = (testExecutionKey, info, tests) => {
-    const import_execution_data = {testExecutionKey: testExecutionKey, info, tests};
-
-    return import_execution_data
+    return { 
+        testExecutionKey, 
+        info, 
+        tests 
+    };
 };
 
+/**
+ * Build payload for a new Test Execution
+ */
 const new_test_execution = (info, tests) => {
-    const import_execution_data = {info, tests};
-
-    return import_execution_data
+    return { 
+        info, 
+        tests 
+    };
 };
 
-module.exports = import_execution_factory();
+export default import_execution_factory;

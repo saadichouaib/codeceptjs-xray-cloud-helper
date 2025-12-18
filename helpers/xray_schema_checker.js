@@ -1,60 +1,34 @@
-const validate = require('jsonschema').validate;
-const process = require('process');
+import { validate } from 'jsonschema';
+import process from 'process';
 
-//Xray schema from https://docs.getxray.app/display/XRAYCLOUD/Using+Xray+JSON+format+to+import+execution+results
+// Xray schema from https://docs.getxray.app/display/XRAYCLOUD/Using+Xray+JSON+format+to+import+execution+results
 const xray_import_schema = {
     "$id": "XraySchema",
     "type": "object",
     "properties": {
-        "testExecutionKey": {
-            "type": "string"
-        },
+        "testExecutionKey": { "type": "string" },
         "info": {
             "type": "object",
             "properties": {
-                "project": {
-                    "type": "string"
-                },
-                "summary": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "version": {
-                    "type": "string"
-                },
-                "revision": {
-                    "type": "string"
-                },
-                "user": {
-                    "type": "string"
-                },
-                "startDate": {
-                    "type": "string",
-                    "format": "date-time"
-                },
-                "finishDate": {
-                    "type": "string",
-                    "format": "date-time"
-                },
-                "testPlanKey": {
-                    "type": "string"
-                },
+                "project": { "type": "string" },
+                "summary": { "type": "string" },
+                "description": { "type": "string" },
+                "version": { "type": "string" },
+                "revision": { "type": "string" },
+                "user": { "type": "string" },
+                "startDate": { "type": "string", "format": "date-time" },
+                "finishDate": { "type": "string", "format": "date-time" },
+                "testPlanKey": { "type": "string" },
                 "testEnvironments": {
                     "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
+                    "items": { "type": "string" }
                 }
             },
             "additionalProperties": false
         },
         "tests": {
             "type": "array",
-            "items": {
-                "$ref": "#/definitions/Test"
-            },
+            "items": { "$ref": "#/definitions/Test" },
             "minItems": 1
         }
     },
@@ -63,148 +37,63 @@ const xray_import_schema = {
         "Test": {
             "type": "object",
             "properties": {
-                "testKey": {
-                    "type": "string"
-                },
-                "testInfo": {
-                    "$ref": "#/definitions/TestInfo"
-                },
-                "start": {
-                    "type": "string",
-                    "format": "date-time"
-                },
-                "finish": {
-                    "type": "string",
-                    "format": "date-time"
-                },
-                "comment": {
-                    "type": "string"
-                },
-                "executedBy": {
-                    "type": "string"
-                },
-                "assignee": {
-                    "type": "string"
-                },
-                "status": {
-                    "type": "string"
-                },
+                "testKey": { "type": "string" },
+                "testInfo": { "$ref": "#/definitions/TestInfo" },
+                "start": { "type": "string", "format": "date-time" },
+                "finish": { "type": "string", "format": "date-time" },
+                "comment": { "type": "string" },
+                "executedBy": { "type": "string" },
+                "assignee": { "type": "string" },
+                "status": { "type": "string" },
                 "steps": {
                     "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ManualTestStepResult"
-                    }
+                    "items": { "$ref": "#/definitions/ManualTestStepResult" }
                 },
                 "examples": {
                     "type": "array",
                     "items": {
                         "type": "string",
-                        "enum": [
-                            "TODO",
-                            "FAILED",
-                            "PASSED",
-                            "EXECUTING"
-                        ]
+                        "enum": ["TODO", "FAILED", "PASSED", "EXECUTING"]
                     }
                 },
                 "iterations": {
                     "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/IterationResult"
-                    }
+                    "items": { "$ref": "#/definitions/IterationResult" }
                 },
                 "defects": {
                     "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
+                    "items": { "type": "string" }
                 },
                 "evidence": {
                     "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/EvidenceItem"
-                    }
+                    "items": { "$ref": "#/definitions/EvidenceItem" }
                 },
-                "evidences": {/* DEPRECATED*/
+                "evidences": { /* DEPRECATED */
                     "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/EvidenceItem"
-                    }
+                    "items": { "$ref": "#/definitions/EvidenceItem" }
                 },
-                "customFields": {
-                    "$ref": "#/definitions/CustomField"
-                }
+                "customFields": { "$ref": "#/definitions/CustomField" }
             },
-            "required": [
-                "status"
-            ],
+            "required": ["status"],
             "dependencies": {
-                "evidence": {
-                    "not": {
-                        "required": [
-                            "evidences"
-                        ]
-                    }
-                },
-                "evidences": {
-                    "not": {
-                        "required": [
-                            "evidence"
-                        ]
-                    }
-                },
+                "evidence": { "not": { "required": ["evidences"] } },
+                "evidences": { "not": { "required": ["evidence"] } },
                 "steps": {
                     "allOf": [
-                        {
-                            "not": {
-                                "required": [
-                                    "examples"
-                                ]
-                            }
-                        },
-                        {
-                            "not": {
-                                "required": [
-                                    "iterations"
-                                ]
-                            }
-                        }
+                        { "not": { "required": ["examples"] } },
+                        { "not": { "required": ["iterations"] } }
                     ]
                 },
                 "examples": {
                     "allOf": [
-                        {
-                            "not": {
-                                "required": [
-                                    "steps"
-                                ]
-                            }
-                        },
-                        {
-                            "not": {
-                                "required": [
-                                    "iterations"
-                                ]
-                            }
-                        }
+                        { "not": { "required": ["steps"] } },
+                        { "not": { "required": ["iterations"] } }
                     ]
                 },
                 "iterations": {
                     "allOf": [
-                        {
-                            "not": {
-                                "required": [
-                                    "steps"
-                                ]
-                            }
-                        },
-                        {
-                            "not": {
-                                "required": [
-                                    "examples"
-                                ]
-                            }
-                        }
+                        { "not": { "required": ["steps"] } },
+                        { "not": { "required": ["examples"] } }
                     ]
                 }
             },
@@ -218,205 +107,95 @@ const xray_import_schema = {
                     "items": {
                         "type": "object",
                         "properties": {
-                            "name": {
-                                "type": "string"
-                            },
-                            "value": {
-                                "type": "string"
-                            }
+                            "name": { "type": "string" },
+                            "value": { "type": "string" }
                         },
                         "additionalProperties": false
                     }
                 },
-                "name": {
-                    "type": "string"
-                },
-                "log": {
-                    "type": "string"
-                },
-                "status": {
-                    "type": "string"
-                },
+                "name": { "type": "string" },
+                "log": { "type": "string" },
+                "status": { "type": "string" },
                 "steps": {
                     "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ManualTestStepResult"
-                    }
+                    "items": { "$ref": "#/definitions/ManualTestStepResult" }
                 }
             },
-            "required": [
-                "status"
-            ],
+            "required": ["status"],
             "additionalProperties": false
         },
         "ManualTestStepResult": {
             "type": "object",
             "properties": {
-                "status": {
-                    "type": "string"
-                },
-                "comment": {
-                    "type": "string"
-                },
+                "status": { "type": "string" },
+                "comment": { "type": "string" },
                 "evidences": {
                     "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/EvidenceItem"
-                    }
+                    "items": { "$ref": "#/definitions/EvidenceItem" }
                 },
-                "defects": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "actualResult": {
-                    "type": "string"
-                }
+                "defects": { "type": "array", "items": { "type": "string" } },
+                "actualResult": { "type": "string" }
             },
-            "required": [
-                "status"
-            ],
+            "required": ["status"],
             "additionalProperties": false
         },
         "TestInfo": {
             "type": "object",
             "properties": {
-                "summary": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "projectKey": {
-                    "type": "string"
-                },
-                "requirementKeys": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "labels": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "type": {
-                    "type": "string"
-                },
+                "summary": { "type": "string" },
+                "description": { "type": "string" },
+                "projectKey": { "type": "string" },
+                "requirementKeys": { "type": "array", "items": { "type": "string" } },
+                "labels": { "type": "array", "items": { "type": "string" } },
+                "type": { "type": "string" },
                 "steps": {
                     "type": "array",
                     "items": {
                         "type": "object",
                         "properties": {
-                            "action": {
-                                "type": "string"
-                            },
-                            "data": {
-                                "type": "string"
-                            },
-                            "result": {
-                                "type": "string"
-                            }
+                            "action": { "type": "string" },
+                            "data": { "type": "string" },
+                            "result": { "type": "string" }
                         },
-                        "required": [
-                            "action"
-                        ],
+                        "required": ["action"],
                         "additionalProperties": false
                     }
                 },
-                "scenario": {
-                    "type": "string"
-                },
-                "scenarioType": {
-                    "type": "string"
-                },
-                "definition": {
-                    "type": "string"
-                }
+                "scenario": { "type": "string" },
+                "scenarioType": { "type": "string" },
+                "definition": { "type": "string" }
             },
             "dependencies": {
                 "steps": {
                     "allOf": [
-                        {
-                            "not": {
-                                "required": [
-                                    "scenario"
-                                ]
-                            }
-                        },
-                        {
-                            "not": {
-                                "required": [
-                                    "definition"
-                                ]
-                            }
-                        }
+                        { "not": { "required": ["scenario"] } },
+                        { "not": { "required": ["definition"] } }
                     ]
                 },
                 "scenario": {
                     "allOf": [
-                        {
-                            "not": {
-                                "required": [
-                                    "steps"
-                                ]
-                            }
-                        },
-                        {
-                            "not": {
-                                "required": [
-                                    "definition"
-                                ]
-                            }
-                        }
+                        { "not": { "required": ["steps"] } },
+                        { "not": { "required": ["definition"] } }
                     ]
                 },
                 "definition": {
                     "allOf": [
-                        {
-                            "not": {
-                                "required": [
-                                    "steps"
-                                ]
-                            }
-                        },
-                        {
-                            "not": {
-                                "required": [
-                                    "scenario"
-                                ]
-                            }
-                        }
+                        { "not": { "required": ["steps"] } },
+                        { "not": { "required": ["scenario"] } }
                     ]
                 }
             },
-            "required": [
-                "summary",
-                "projectKey",
-                "type"
-            ],
+            "required": ["summary", "projectKey", "type"],
             "additionalProperties": false
         },
         "EvidenceItem": {
             "type": "object",
             "properties": {
-                "data": {
-                    "type": "string"
-                },
-                "filename": {
-                    "type": "string"
-                },
-                "contentType": {
-                    "type": "string"
-                }
+                "data": { "type": "string" },
+                "filename": { "type": "string" },
+                "contentType": { "type": "string" }
             },
-            "required": [
-                "data",
-                "filename"
-            ],
+            "required": ["data", "filename"],
             "additionalProperties": false
         },
         "CustomField": {
@@ -424,30 +203,28 @@ const xray_import_schema = {
             "items": {
                 "type": "object",
                 "properties": {
-                    "id": {
-                        "type": "string"
-                    },
+                    "id": { "type": "string" },
                     "value": {}
                 },
-                "required": [
-                    "id",
-                    "value"
-                ],
+                "required": ["id", "value"],
                 "additionalProperties": false
             }
         }
     }
 };
 
-const xray_schema_checker = () => ({
-
-    validate : (import_execution_data) => {
+const xray_schema_checker = {
+    /**
+     * Validate the Xray Import Execution payload against the official schema
+     * @param {Object} import_execution_data 
+     */
+    validate: (import_execution_data) => {
         const result = validate(import_execution_data, xray_import_schema);
         if (result.errors.length > 0) {
-            console.error(`Error in xray execute import body, please refer to the developer. \nReason : \n`, result.errors);
+            console.error('Error in xray execute import body, please refer to the developer. \nReason : \n', result.errors);
             process.exit(1);
         }
     }
-});
+};
 
-module.exports = xray_schema_checker();
+export default xray_schema_checker;

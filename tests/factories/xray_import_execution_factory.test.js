@@ -1,5 +1,5 @@
-const xray_import_execution_factory = require('../../factories/xray_import_execution_factory');
-const { faker } = require('@faker-js/faker');
+import { faker } from '@faker-js/faker';
+import xray_import_execution_factory from '../../factories/xray_import_execution_factory.js';
 
 describe('xray import execution factory', () => {
     it('should return only info and tests objects if testExecutionKey not provided', () => {
@@ -25,13 +25,13 @@ describe('xray import execution factory', () => {
             finish: faker.date.recent()
         };
 
-        let entry_data = new Object();
-        entry_data.info = info_data;
-        entry_data.tests = [tests_data];
+        const entry_data = {
+            info: info_data,
+            tests: [tests_data]
+        };
 
         const import_execution_data = xray_import_execution_factory.build("new_test_execution", null, info_data, [tests_data]);
         expect(import_execution_data).toEqual(entry_data);
-
     });
 
     it('should return testExecutionKey, info and tests objects if testExecutionKey is provided', () => {
@@ -59,13 +59,14 @@ describe('xray import execution factory', () => {
             finish: faker.date.recent()
         };
 
-        let entry_data = new Object();
-        entry_data.info = info_data;
-        entry_data.tests = [tests_data];
+        // Note: I preserved your logic, but typically if a key is provided, 
+        // the expectation object might need to include testExecutionKey.
+        const entry_data = {
+            info: info_data,
+            tests: [tests_data]
+        };
 
         const import_execution_data = xray_import_execution_factory.build("new_test_execution", testExecutionKey, info_data, [tests_data]);
         expect(import_execution_data).toEqual(entry_data);
-
     });
-
 });

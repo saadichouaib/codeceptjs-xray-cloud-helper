@@ -1,5 +1,5 @@
-const xray_info_factory = require('../../factories/xray_info_factory');
-const { faker } = require('@faker-js/faker');
+import { faker } from '@faker-js/faker';
+import xray_info_factory from '../../factories/xray_info_factory.js';
 
 describe('info factory', () => {
     it('should return info object with sent values', () => {
@@ -17,13 +17,14 @@ describe('info factory', () => {
 
         const info_data = xray_info_factory.get_info_object(body);
         expect(info_data).toEqual(body);
-
     });
 
     it('should return default info object when no custom_data sent', () => {
         const body = {};
 
         const info_data = xray_info_factory.get_info_object(body);
+        
+        // Preserving the original expected values and dates
         expect(info_data).toEqual({
             project: "",
             summary: "Execution of automated tests",
@@ -35,6 +36,5 @@ describe('info factory', () => {
             startDate: "2022-08-30T11:47:35+01:00",
             finishDate: "2022-08-30T12:00:35+01:00",
         });
-
     });
 });

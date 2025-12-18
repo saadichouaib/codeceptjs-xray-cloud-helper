@@ -1,12 +1,13 @@
-const inquirer = require('inquirer');
-const colors = require('chalk');
-const {  output } = require('codeceptjs');
-const { updateConfig, getConfig, getTestRoot } = require('codeceptjs/lib/command/utils');
+import colors from 'chalk';
+import { output } from 'codeceptjs';
+import { getConfig, getTestRoot, updateConfig } from 'codeceptjs/lib/command/utils.js';
+import inquirer from 'inquirer';
 
-const init = () => ({
-
-    questions : () => {
-
+/**
+ * CLI tool to initialize and configure the Xray Cloud Helper plugin
+ */
+const init = {
+    questions: () => {
         output.print();
         output.print(`  Welcome to ${colors.magenta.bold('codeceptjs-xray-cloud-helper')} initialization tool.`);
         output.print('  It will prepare and configure the plugin for you.');
@@ -15,8 +16,8 @@ const init = () => ({
         const testsPath = getTestRoot();
         const config = getConfig(testsPath);
 
-        //Check if xrayImport is already initialized
-        if (config.plugins.xrayImport) {
+        // Check if xrayImport is already initialized
+        if (config.plugins?.xrayImport !== undefined) {
             output.print(colors.whiteBright.bgRed.bold(' xrayImport is already initialized in this project. See `xrayImport` in plugins section in codecept.conf.js file. '));
             output.print();
             process.exit(1);
@@ -104,14 +105,13 @@ const init = () => ({
                 default: '',
             },
         ]).then((result) => {
-
             const xrayConfig = {
                 require: "codeceptjs-xray-cloud-helper",
                 enabled: true,
                 debug: result.debug,
                 projectKey: result.projectKey,
                 importToExistingTestExecution: result.importTestExecution,
-                existingTestExecutionKey: result.testExecutionKey !== undefined ? result.testExecutionKey : '',
+                existingTestExecutionKey: result.testExecutionKey ?? '',
                 testExecutionAssigneeUserId: result.assignee,
                 testExecutionPlanKey: result.planKey,
                 testExecutionVersion: result.version,
@@ -119,6 +119,7 @@ const init = () => ({
                 testExecutionEnvironments: [`${result.environments}`],
                 testExecutionSummary: "Execution of automated tests",
                 testExecutionDescription: "This execution is automatically created when importing execution results from Gitlab",
+                testExecutionSendEvidenceOnFail: result.testExecutionSendEvidenceOnFail,
                 createNewJiraTest: result.createNewJiraTest,
                 timeout: 60000,
                 xrayClientId: result.xrayClientId,
@@ -126,16 +127,23 @@ const init = () => ({
             };
 
             output.print();
+            
+            // Ensure plugins object exists before assignment
+            if (config.plugins === undefined) {
+                config.plugins = {};
+            }
+            
             config.plugins.xrayImport = xrayConfig;
             updateConfig(testsPath, config);
+
             output.print();
             output.print(colors.whiteBright.bgGreen.bold('Last step before running your tests :'));
-            output.print(colors.whiteBright.bgYellow.bold('Add tag(@TEST_) to your codecept scenarios to link them with Jira Tests. (Exemple: tag @TEST_POSDEV-1110 will link the execution test to POSDEV-1110 within Jira)'));
+            output.print(colors.whiteBright.bgYellow.bold('Add tag(@TEST_) to your codecept scenarios to link them with Jira Tests. (Example: tag @TEST_POSDEV-1110 will link the execution test to POSDEV-1110 within Jira)'));
             output.print();
             output.print(colors.bold.green('XrayImport is configured! Enjoy!'));
             output.print();
         });
     }
-});
+};
 
-module.exports = init();
+export default init;

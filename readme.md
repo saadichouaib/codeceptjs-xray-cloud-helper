@@ -40,9 +40,11 @@ It allows you to:
 - Send the last result of a scenario if it retries one or more times after a fail
 
 ## Configuration
+
 Choose between the following two options: **"Quickstart"** ou **"Manual configuration"**.
 
 ### Quickstart
+
 Use the command line to help you automatically generate the config by answering questions.
 
 ```
@@ -52,7 +54,9 @@ npx xray-import init
 ![xrayImport init](./docs/cli_init.png)
 
 ### Manual configuration
+
 Manually add and modify the following config in the file `codecept.conf.js`.
+
 ```
 plugins: {
     xrayImport: {
@@ -78,7 +82,8 @@ plugins: {
     },
 }
 ```
-#### Possible config fields :
+
+#### Possible config fields
 
 | Config field                   | Required          | Type    | Description                                                                                                                                                              |
 | ------------------------------ | ----------------- |---------| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -101,7 +106,8 @@ plugins: {
 | xraySecret                     | yes               | string  | To be requested from your Jira admin                                                                                                                                     |
 
 ## Linking a CodeceptJS scenario to a Jira test (Generic, Manual, Cucumber)
-**Prerequisite:** **createNewJiraTest** is set to **false** in the config 
+
+**Prerequisite:** **createNewJiraTest** is set to **false** in the config
 
 To link a Codecept scenario to a Jira test, you need to add a tag that starts with **"@TEST_"**.
 
@@ -126,7 +132,9 @@ Scenario('Generic test', ({ I }) => {
 ![Test Execution view of Generic test](./docs/generic.png)
 
 ### Manual tests
+
 #### Manual tests with steps
+
 To link a codeceptJS test with a Jira Manual test, you must first add the following plugin to `codecept.conf.js`:
 
 ```
@@ -137,6 +145,7 @@ plugins: {
     }
 }
 ```
+
 This plugin allows linking the Jira test steps to the codecept scenarios.
 
 To define the limit of steps, you need to add keywords starting with **xray_\`step...\`** to the codecept scenario (see the example below).
@@ -168,6 +177,7 @@ Scenario('Manual test', async({ I }) => {
 ![Test Execution view of Manual test](./docs/manual.png)
 
 #### Manual tests with steps and iterations (Data driven tests)
+
 Xray tests that contain datasets are initially considered as manual tests with steps.
 
 Therefore, it is necessary to follow the previous chapter to configure the `commentStep` plugin and define the limit of steps in your scenario.
@@ -202,6 +212,7 @@ To learn more about "CodeceptJS Data Driven Tests" : **[Doc codeceptJS](https://
 ### Cucumber tests
 
 #### Cucumber scenario
+
 ```gherkin
 @nominal_scenario
 Feature: Subscribers see different articles based on their subscription level
@@ -218,6 +229,7 @@ Feature: Subscribers see different articles based on their subscription level
 #### Cucumber scenario outline
 
 In the case of a Cucumber test of type Scenario Outline, the helper automatically distinguishes between the different examples and imports the result of each example to Xray (see the screenshot below).
+
 ```gherkin
 @nominal_outline
 Feature: Google Searching
@@ -272,18 +284,23 @@ plugins: {
 Below are some examples of importing failed tests with screenshots and error messages injected into the comment of the test run.
 
 #### Generic test
+
 ![Test Execution view of failed generic test](./docs/generic_failed.png)
 
 #### Manual test
+
 ![Test Execution view of failed manual test](./docs/manual_failed.png)
 
 #### Manual with iterations
+
 ![Test Execution view of failed manual with iterations test](./docs/manual_iterations_failed.png)
 
 #### Cucumber scenario
+
 ![Test Execution view of failed Cucumber scenario](./docs/cucumber_scenario_failed.png)
 
 #### Cucumber scenario outline
+
 ![Test Execution view of failed cucumber scenario outline](./docs/cucumber_scenario_outline_failed.png)
 
 ## Automatic creation of test tickets on Jira
@@ -294,7 +311,8 @@ One of the possible uses of this helper is the automatic creation of test ticket
 
 - Start by modifying the configuration on `codecept.conf.js` in the `plugins.xrayImport` section as follows :
 
-The **"projectKey"** is mandatory when `createNewJiraTest: true`. 
+The **"projectKey"** is mandatory when `createNewJiraTest: true`.
+
 ```
 {
     projectKey: "JIRAKEY",
@@ -333,7 +351,8 @@ Scenario('[Auto created test] Manual test - Passed', async({ I }) => {
 - Once the import of the results is complete, we notice that the Jira test has been automatically created and linked to the testExecution
 - Now, all that remains is to add the @TEST_ tag to the Codecept scenario corresponding to the Jira ticket that has just been created to avoid creating another duplicate ticket during the next execution
 
-**Note:** 
+**Note:**
+
 - The helper will try to create a Jira test ticket only if the codecept scenario does not have a `@TEST_` tag and `createNewJiraTest: true`
 - If the codecept scenario does not have a `@TEST_` tag and `createNewJiraTest: false` in the config, the scenario result will be simply ignored during the import
 
@@ -345,19 +364,19 @@ This action can be performed directly with the help of the CLI.
 
 ![xrayImport init](./docs/cli_cucumber.png)
 
-#### Usage :
+#### Usage
 
 First, you need to prepare the feature file that you want to import to Xray/Jira.
 
 Here are some rules to keep in mind:
 
 - If the scenario contains a `@TEST_` tag
-    - If the test already exists on Jira, the helper will modify it
-    - If the test does not exist on Jira, an error will be returned
+  - If the test already exists on Jira, the helper will modify it
+  - If the test does not exist on Jira, an error will be returned
 - If the scenario doesn't contain `@TEST_` tag
-    - The helper will try to find a test that matches our scenario (same summary, steps...)
-        - If it finds it, it will modify it
-        - If it doesn't find it, it will create a new Jira test
+  - The helper will try to find a test that matches our scenario (same summary, steps...)
+    - If it finds it, it will modify it
+    - If it doesn't find it, it will create a new Jira test
 
 For more information, please see the complete documentation: [doc xray](https://docs.getxray.app/display/XRAYCLOUD/Importing+Cucumber+Tests+-+REST+v2).
 
@@ -404,7 +423,6 @@ npx xray-import cucumber
 - Enter the key of the Jira project where we want to create the tests
 - Enter the directory that contains the feature files
 - Choose the file that contains the tests we want to create/modify on Jira
-
 
 ## Results
 

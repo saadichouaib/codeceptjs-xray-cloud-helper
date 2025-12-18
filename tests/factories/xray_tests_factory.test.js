@@ -1,5 +1,5 @@
-const xray_tests_factory = require('../../factories/xray_tests_factory');
-const { faker } = require('@faker-js/faker');
+import { faker } from '@faker-js/faker';
+import xray_tests_factory from '../../factories/xray_tests_factory.js';
 
 describe('tests factory', () => {
     it('should return default tests object when no custom_data sent', () => {
@@ -15,7 +15,15 @@ describe('tests factory', () => {
             executedBy: "",
             finish: "2022-08-30T12:00:35+01:00",
             start: "2022-08-30T11:47:35+01:00",
-            status: "TODO"
+            status: "TODO",
+            testInfo: {
+                definition: "generic test definition here",
+                labels: "automated_test",
+                projectKey: "",
+                requirementKeys: [],
+                summary: "Test generated automatically",
+                type: "Generic",
+            }
         });
     });
 
@@ -45,11 +53,9 @@ describe('tests factory', () => {
             labels: body.testInfo_labels,
             definition: body.testInfo_definition
         });
-
     });
 
     it('should return tests object without testInfo when testKey is present', () => {
-
         const body = {
             testKey: `POSDEV-${faker.string.numeric(4)}`,
             examples: null,
@@ -100,7 +106,6 @@ describe('tests factory', () => {
             customFields: [],
             executedBy: body.executedBy
         });
-
     });
 
     it('should return valid body when test entry contains examples array (cucumber test)', () => {
@@ -131,7 +136,6 @@ describe('tests factory', () => {
             customFields: [],
             executedBy: body.executedBy
         });
-
     });
 
     it('should return valid body when test entry contains steps array (Manual test)', () => {
@@ -175,6 +179,5 @@ describe('tests factory', () => {
             customFields: [],
             executedBy: body.executedBy
         });
-
     });
 });

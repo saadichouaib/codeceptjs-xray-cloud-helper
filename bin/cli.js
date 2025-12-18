@@ -1,20 +1,25 @@
 #!/usr/bin/env node
-const { program } = require('commander');
-const init = require('../helpers/cli/init');
-const cucumber = require('../helpers/cli/import_cucumber_feature');
-const package = require('../package.json');
+import { program } from 'commander';
+import { createRequire } from 'module';
+import process from 'process';
+import cucumber from '../helpers/cli/import_cucumber_feature.js';
+import init from '../helpers/cli/init.js';
+
+// Helper to allow importing JSON in ESM
+const require = createRequire(import.meta.url);
+const packageJSON = require('../package.json');
 
 program
-    .version(package.version);
+    .version(packageJSON.version);
 
 program
     .command('init')
     .description('Adds xrayImport config in codecept.conf.js')
-    .action(init.questions);
+    .action(() => init.questions());
 
 program
     .command('cucumber')
     .description('Create/Update tests on Jira/Xray from .feature file')
-    .action(cucumber.questions);
+    .action(() => cucumber.questions());
 
 program.parse(process.argv);

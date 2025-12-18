@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { program } from 'commander';
-import { createRequire } from 'module';
-import process from 'process';
+import { createRequire } from 'node:module';
+import process from 'node:process';
 import cucumber from '../helpers/cli/import_cucumber_feature.js';
 import init from '../helpers/cli/init.js';
 

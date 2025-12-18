@@ -1,7 +1,8 @@
 import colors from 'chalk';
-import { output } from 'codeceptjs';
-import { getConfig, getTestRoot, updateConfig } from 'codeceptjs/lib/command/utils.js';
+import codeceptjs from 'codeceptjs';
+import { getConfig, getTestRoot, updateConfig } from 'codeceptjs/lib/command/utils';
 import inquirer from 'inquirer';
+const { output } = codeceptjs;
 
 /**
  * CLI tool to initialize and configure the Xray Cloud Helper plugin

@@ -1,9 +1,10 @@
 import colors from 'chalk';
-import { output } from 'codeceptjs';
-import { getConfig, getTestRoot } from 'codeceptjs/lib/command/utils.js';
+import codeceptjs from 'codeceptjs';
+import { getConfig, getTestRoot } from 'codeceptjs/lib/command/utils';
 import fs from 'fs';
 import inquirer from 'inquirer';
 import xray_api from '../../api/xray_api.js';
+const { output } = codeceptjs;
 
 /**
  * CLI helper to import Cucumber feature files to Xray

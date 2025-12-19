@@ -46,7 +46,7 @@ let iterations_array = [];
  * CodeceptJS Xray Cloud Helper
  * @param {Object} config 
  */
-export default function (config) {
+export default function main(config) {
     event.dispatcher.on(event.all.before, () => {
         start_date = moment().format();
         config = Object.assign(defaultConfig, config);
@@ -77,7 +77,7 @@ export default function (config) {
                 return true;
             });
 
-            if (tests_results[tests_results.length - 1]?.test_key !== test_key) {
+            if (tests_results[- 1]?.test_key !== test_key) {
                 test_evidences = [];
             }
 
@@ -97,7 +97,7 @@ export default function (config) {
             [manual_steps_results, iterations_array, iteration_number, test_comment, test_evidences] = manual.save_manual_results(is_manual, tests_results, manual_steps_results, iterations_array, manual_iteration, iteration_number, test_key, test_comment, test_evidences, test_contains_iterations, test, test_state, config);
 
             const is_generic = is_manual === false && is_bdd === false;
-            generic.save_generic_results(is_generic, tests_results, test_key, test_comment, test_evidences, test, config, test_state);
+            generic.save_generic_results(is_generic, tests_results, test_key, test, config, test_state);
         });
     });
 
@@ -149,8 +149,8 @@ export default function (config) {
         }
 
         const import_execution_data = config.importToExistingTestExecution ?
-            await data_generator.build_import_execution_data("existing_test_execution", config.existingTestExecutionKey, info_data, tests_data) :
-            await data_generator.build_import_execution_data("new_test_execution", null, info_data, tests_data);
+            data_generator.build_import_execution_data("existing_test_execution", config.existingTestExecutionKey, info_data, tests_data) :
+            data_generator.build_import_execution_data("new_test_execution", null, info_data, tests_data);
 
         if (config.debug) {
             output.print(`Send results to JIRA : \n${JSON.stringify(import_execution_data, null, 2)}`);

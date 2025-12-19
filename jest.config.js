@@ -26,7 +26,7 @@ export default {
   // Ensure node_modules aren't accidentally ignored if they need ESM transformation
   transformIgnorePatterns: [
     "/node_modules/",
-    "\\.pnp\\.[^\\/]+$"
+    String.raw`\\.pnp\\.[^\\/]+$`
   ],
 
   // Indicates whether each individual test should be reported during the run

@@ -1,7 +1,7 @@
 import colors from 'chalk';
-import fs from 'fs';
 import loading from 'loading-cli';
-import process from 'process';
+import fs from 'node:fs';
+import process from 'node:process';
 import api_errors from './api_errors.js';
 
 let load_auth;

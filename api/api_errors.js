@@ -46,7 +46,7 @@ export function sanitize_error(error) {
 
     // Sanitize string-based messages
     if (error.message) {
-        sanitized.message = error.message.replace(
+        sanitized.message = error.message.replaceAll(
             /("client_id":"[^"]+",|"client_secret":"[^"]+")/g, 
             '"<hidden>"'
         );
@@ -56,8 +56,8 @@ export function sanitize_error(error) {
     const hasStringBody = error.body && typeof error.body === 'string';
     if (hasStringBody === true) {
         sanitized.body = error.body
-            .replace(/"client_id":"[^"]+"/g, '"client_id":"*****"')
-            .replace(/"client_secret":"[^"]+"/g, '"client_secret":"*****"');
+            .replaceAll(/"client_id":"[^"]+"/g, '"client_id":"*****"')
+            .replaceAll(/"client_secret":"[^"]+"/g, '"client_secret":"*****"');
     }
 
     return sanitized;

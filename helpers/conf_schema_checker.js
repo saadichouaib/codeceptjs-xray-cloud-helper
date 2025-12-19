@@ -1,5 +1,5 @@
 import Joi from 'joi';
-import process from 'process';
+import process from 'node:process';
 
 const xray_import_schema = Joi.object({
     require: Joi.string().required(),
@@ -10,7 +10,7 @@ const xray_import_schema = Joi.object({
     importToExistingTestExecution: Joi.boolean().required(),
     existingTestExecutionKey: Joi.when('importToExistingTestExecution', { 
         is: true, 
-        then: Joi.string().required(), 
+        then: Joi.string().required(),// NOSONAR then is part of Joi
         otherwise: Joi.string().allow('') 
     }),
     testExecutionPlanKey: Joi.string().allow(''),
@@ -19,12 +19,12 @@ const xray_import_schema = Joi.object({
     testExecutionEnvironments: Joi.array(),
     testExecutionSummary: Joi.when('importToExistingTestExecution', { 
         is: true, 
-        then: Joi.string().allow(''), 
+        then: Joi.string().allow(''), // NOSONAR
         otherwise: Joi.string().required() 
     }),
     testExecutionDescription: Joi.when('importToExistingTestExecution', { 
         is: true, 
-        then: Joi.string().allow(''), 
+        then: Joi.string().allow(''), // NOSONAR
         otherwise: Joi.string().required() 
     }),
     testExecutionSendEvidenceOnFail: Joi.boolean().required(),

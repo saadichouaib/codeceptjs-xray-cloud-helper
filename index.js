@@ -106,7 +106,7 @@ export default function (config) {
         config = Object.assign(defaultConfig, config);
         conf_schema_checker.validate(config);
 
-        const info_data = await data_generator.generate_info_data({
+        const info_data = data_generator.generate_info_data({
             project: config.projectKey,
             summary: config.testExecutionSummary,
             description: config.testExecutionDescription,
@@ -123,7 +123,7 @@ export default function (config) {
             
             // Cleaned up logic: If it has a tag OR we are allowed to create new tests, process it.
             if (hasXrayTag || config.createNewJiraTest) {
-                tests_data.push(await data_generator.generate_tests_data({
+                tests_data.push( data_generator.generate_tests_data({
                     testKey: hasXrayTag ? test_result.test_key : null,
                     testInfo_projectKey: config.projectKey ?? " ",
                     testInfo_summary: test_result.title,

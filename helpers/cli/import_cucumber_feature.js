@@ -1,8 +1,8 @@
 import colors from 'chalk';
 import codeceptjs from 'codeceptjs';
 import { getConfig, getTestRoot } from 'codeceptjs/lib/command/utils';
-import fs from 'fs';
 import inquirer from 'inquirer';
+import fs from 'node:fs';
 import xray_api from '../../api/xray_api.js';
 const { output } = codeceptjs;
 

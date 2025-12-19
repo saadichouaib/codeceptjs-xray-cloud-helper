@@ -1,5 +1,5 @@
 import { validate } from 'jsonschema';
-import process from 'process';
+import process from 'node:process';
 
 // Xray schema from https://docs.getxray.app/display/XRAYCLOUD/Using+Xray+JSON+format+to+import+execution+results
 const xray_import_schema = {

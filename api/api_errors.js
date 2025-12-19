@@ -1,16 +1,28 @@
+// @ts-check
+
+/**
+ * @typedef {Object} XrayErrorBody
+ * @property {string} [message]
+ * @property {string} [error]
+ * @property {number} [status]
+ * @property {string} [statusText]
+ * @property {any} [body]
+ */
+
 /**
  * Error handling utility for Fetch API requests
+ * @param {any} error
+ * @returns {Promise<XrayErrorBody>}
  */
 export async function handle_fetch_error(error) {
-    let errorMessage = {};
+    /** @type {XrayErrorBody} */
+    let errorMessage;
 
-    // 1. Handle Response objects (thrown manually when response.ok is false)
+    // 1. Handle Response objects
     if (error instanceof Response) {
         try {
-            // Try to parse JSON error details from the Xray server
             errorMessage = await error.json();
         } catch (e) {
-            // Fallback for non-JSON error responses (e.g., 502 Bad Gateway)
             errorMessage = {
                 status: error.status,
                 statusText: error.statusText,
@@ -18,18 +30,25 @@ export async function handle_fetch_error(error) {
             };
         }
     } 
-    // 2. Handle Abort errors (specifically for the timeout logic)
-    else if (error.name === 'AbortError') {
-        errorMessage = {
-            message: "The request timed out.",
-            error: error.message
-        };
+    // 2. Handle Abort errors or standard Error objects
+    else if (error instanceof Error) {
+        if (error.name === 'AbortError') {
+            errorMessage = {
+                message: "The request timed out.",
+                error: error.message
+            };
+        } else {
+            errorMessage = {
+                message: error.message || "An unexpected error occurred",
+                error: JSON.stringify(sanitize_error(error))
+            };
+        }
     }
-    // 3. Handle Network failures or general exceptions
+    // 3. Fallback for unknown error types
     else {
         errorMessage = {
-            message: error.message ?? "An unexpected error occurred",
-            error: sanitize_error(error)
+            message: "An unknown error occurred",
+            error: String(error)
         };
     }
 
@@ -38,24 +57,26 @@ export async function handle_fetch_error(error) {
 
 /**
  * Sanitizes sensitive data like client_id and client_secret from logs
- * @param {*} error 
- * @returns {Object}
+ * @param {any} error 
+ * @returns {Record<string, any>}
  */
 export function sanitize_error(error) {
-    const sanitized = { ...error };
+    const sanitized = { 
+        name: error?.name,
+        message: error?.message || "",
+        body: error?.body
+    };
 
-    // Sanitize string-based messages
-    if (error.message) {
-        sanitized.message = error.message.replaceAll(
-            /("client_id":"[^"]+",|"client_secret":"[^"]+")/g, 
-            '"<hidden>"'
+    if (typeof sanitized.message === 'string') {
+        // This regex handles both "client_id":"value" and escaped \"client_id\":\"value\"
+        sanitized.message = sanitized.message.replaceAll(
+            /\\?"(client_id|client_secret)\\?":\\?"[^"]+\\?"/g, 
+            '"$1":"<hidden>"'
         );
     }
 
-    // Sanitize body content if present
-    const hasStringBody = error.body && typeof error.body === 'string';
-    if (hasStringBody === true) {
-        sanitized.body = error.body
+    if (typeof sanitized.body === 'string') {
+        sanitized.body = sanitized.body
             .replaceAll(/"client_id":"[^"]+"/g, '"client_id":"*****"')
             .replaceAll(/"client_secret":"[^"]+"/g, '"client_secret":"*****"');
     }

@@ -1,8 +1,22 @@
+// @ts-check
 import colors from 'chalk';
 import codeceptjs from 'codeceptjs';
 import { getConfig, getTestRoot, updateConfig } from 'codeceptjs/lib/command/utils';
 import inquirer from 'inquirer';
+/**
+ * @typedef {Object} CodeceptOutput
+ * @property {function(string=): void} print
+ * @property {function(string=): void} debug
+ * @property {function(string=): void} error
+ */
+
+/** @type {CodeceptOutput} */
+// @ts-ignore to ignore the print error
 const { output } = codeceptjs;
+
+/**
+ * @typedef {import('../conf_schema_checker.js').XrayPluginConfig} XrayPluginConfig
+ */
 
 /**
  * CLI tool to initialize and configure the Xray Cloud Helper plugin
@@ -106,23 +120,25 @@ const init = {
                 default: '',
             },
         ]).then((result) => {
+            /** @type {XrayPluginConfig} */
             const xrayConfig = {
                 require: "codeceptjs-xray-cloud-helper",
                 enabled: true,
                 debug: result.debug,
-                projectKey: result.projectKey,
+                projectKey: result.projectKey || '',
                 importToExistingTestExecution: result.importTestExecution,
-                existingTestExecutionKey: result.testExecutionKey ?? '',
+                existingTestExecutionKey: result.testExecutionKey || '',
                 testExecutionAssigneeUserId: result.assignee,
                 testExecutionPlanKey: result.planKey,
                 testExecutionVersion: result.version,
                 testExecutionRevision: result.revision,
-                testExecutionEnvironments: [`${result.environments}`],
+                testExecutionEnvironments: [result.environments],
                 testExecutionSummary: "Execution of automated tests",
                 testExecutionDescription: "This execution is automatically created when importing execution results from Gitlab",
                 testExecutionSendEvidenceOnFail: result.testExecutionSendEvidenceOnFail,
                 createNewJiraTest: result.createNewJiraTest,
                 timeout: 60000,
+                xrayCloudUrl: 'https://xray.cloud.getxray.app',
                 xrayClientId: result.xrayClientId,
                 xraySecret: result.xraySecret
             };
@@ -138,8 +154,8 @@ const init = {
             updateConfig(testsPath, config);
 
             output.print();
-            output.print(colors.whiteBright.bgGreen.bold('Last step before running your tests :'));
-            output.print(colors.whiteBright.bgYellow.bold('Add tag(@TEST_) to your codecept scenarios to link them with Jira Tests. (Example: tag @TEST_POSDEV-1110 will link the execution test to POSDEV-1110 within Jira)'));
+            output.print(colors.whiteBright.bgGreen.bold(' Last step before running your tests : '));
+            output.print(colors.whiteBright.bgYellow.bold(' Add tag(@TEST_) to your codecept scenarios to link them with Jira Tests. (Example: tag @TEST_POSDEV-1110 will link the execution test to POSDEV-1110 within Jira) '));
             output.print();
             output.print(colors.bold.green('XrayImport is configured! Enjoy!'));
             output.print();

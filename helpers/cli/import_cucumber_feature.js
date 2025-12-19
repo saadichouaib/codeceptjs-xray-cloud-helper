@@ -1,10 +1,24 @@
+// @ts-check
 import colors from 'chalk';
 import codeceptjs from 'codeceptjs';
 import { getConfig, getTestRoot } from 'codeceptjs/lib/command/utils';
 import inquirer from 'inquirer';
 import fs from 'node:fs';
 import xray_api from '../../api/xray_api.js';
-const { output } = codeceptjs;
+/**
+ * @typedef {Object} CucumberPromptResult
+ * @property {string} featuresFolderPath
+ * @property {string} projectKey
+ */
+/** * Define the CodeceptJS Output type to fix ts(2339)
+ * @typedef {Object} CodeceptOutput
+ * @property {function(string=): void} print
+ * @property {function(string=): void} error
+ */
+
+/** @type {CodeceptOutput} */
+// @ts-ignore
+const output = codeceptjs.output;
 
 /**
  * CLI helper to import Cucumber feature files to Xray
@@ -33,7 +47,7 @@ const import_cucumber_feature = {
                 name: 'projectKey',
                 type: 'input',
                 message: 'Enter your project Key:',
-                default: xrayImportConfig.projectKey ?? ''
+                default: xrayImportConfig.projectKey || ''
             },
             {
                 name: 'featuresFolderPath',
@@ -45,6 +59,7 @@ const import_cucumber_feature = {
                 name: 'featureFilePath',
                 type: 'list',
                 message: 'Which feature file you want to import into Xray/Jira?',
+                /** @param {CucumberPromptResult} result */
                 choices: (result) => get_files_from_dir(result.featuresFolderPath)
             }
         ]).then(async (result) => {
@@ -64,7 +79,7 @@ const import_cucumber_feature = {
                 xrayImportConfig.timeout
             );
 
-            if (xrayImportConfig.debug) {
+            if (xrayImportConfig.debug === true) {
                 output.print(`Response FROM XRAY API: \n${JSON.stringify(response.data, null, 2)}`);
             }
         });
@@ -87,9 +102,11 @@ const get_files_from_dir = (dir) => {
 
         return files.map(file => `${dir}/${file}`);
     } catch (err) {
-        output.error(`Error reading directory ${dir}: ${err.message}`);
-        process.exit(1);
-    }
+    // Check if it's a standard Error object to access .message safely
+    const errorMessage = (err instanceof Error) ? err.message : String(err);
+    output.error(`Error reading directory ${dir}: ${errorMessage}`);
+    process.exit(1);
+}
 };
 
 export default import_cucumber_feature;

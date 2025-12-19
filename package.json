@@ -22,7 +22,8 @@
     "xray-import": "./bin/cli.js"
   },
   "scripts": {
-    "tests": "NODE_OPTIONS=--experimental-vm-modules jest --verbose"
+    "test": "node --experimental-vm-modules node_modules/.bin/jest",
+    "test:cov": "node --experimental-vm-modules node_modules/.bin/jest --coverage"
   },
   "dependencies": {
     "@faker-js/faker": "^10.1.0",
@@ -40,5 +41,8 @@
   "overrides": {
     "openai": "^4.28.0",
     "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@jest/globals": "^30.2.0"
   }
 }

@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+// @ts-check
+
 import { program } from 'commander';
 import { createRequire } from 'node:module';
 import process from 'node:process';

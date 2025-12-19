@@ -1,3 +1,9 @@
+// @ts-check
+
+/**
+ * @typedef {import('../helpers/data_generator.js').XrayTestData} XrayTestData
+ */
+
 /**
  * Factory to build the 'tests' array items for Xray execution import
  */
@@ -5,8 +11,8 @@ const tests_factory = {
     /**
      * Get payload for /api/v2/import/execution (tests object)
      *
-     * @param {Object} tests_data_custom
-     * @returns {Object}
+     * @param {Partial<XrayTestData>} tests_data_custom
+     * @returns {XrayTestData} - Now returns the specific type instead of generic Object
      */
     get_tests_object: (tests_data_custom) => {
         return setup_tests_data(tests_data_custom);
@@ -15,37 +21,39 @@ const tests_factory = {
 
 /**
  * Setup main test data entry
- * @param {Object} custom 
- * @returns {Object}
+ * @param {Partial<XrayTestData>} custom 
+ * @returns {XrayTestData} 
  */
 const setup_tests_data = (custom) => {
-    const testEntry = {};
+    // We initialize with defaults to satisfy the XrayTestData interface immediately
+    /** @type {XrayTestData} */
+    const testEntry = {
+        testKey: custom.testKey ?? null,
+        status: custom.status ?? "TODO",
+        comment: custom.comment ?? "Default comment for the test run",
+        assignee: custom.assignee ?? "",
+        start: custom.start ?? new Date().toISOString(),
+        finish: custom.finish ?? new Date().toISOString(),
+        evidence: custom.evidence ?? [],
+        customFields: custom.customFields ?? [],
+        executedBy: "",
+        examples: null,
+        steps: null,
+        iterations: null
+    };
 
     // Logic for Test Key vs New Test Info
-    if (custom.testKey === null || custom.testKey === undefined) {
+    if (testEntry.testKey === null) {
+        // @ts-ignore - setup_testInfo_data will return the required Object shape
         testEntry.testInfo = setup_testInfo_data(custom);
-    } else {
-        testEntry.testKey = custom.testKey;
     }
 
-    testEntry.start = custom.start ?? "2022-08-30T11:47:35+01:00";
-    testEntry.finish = custom.finish ?? "2022-08-30T12:00:35+01:00";
-    testEntry.comment = custom.comment ?? "Default comment for the test run";
-    testEntry.executedBy = custom.executedBy ?? "";
-    testEntry.assignee = custom.assignee ?? "";
-    testEntry.status = custom.status ?? "TODO";
-    
-    // Defaulting to empty arrays for these fields
-    testEntry.defects = custom.defects ?? [];
-    testEntry.evidence = custom.evidence ?? [];
-    testEntry.customFields = custom.customFields ?? [];
-
-    // Mutual exclusivity logic for Xray (Examples vs Steps vs Iterations)
-    if (custom.examples) {
+    // Mutual exclusivity logic for Xray payload
+    if (custom.examples && custom.examples.length > 0) {
         testEntry.examples = custom.examples;
-    } else if (custom.steps) {
+    } else if (custom.steps && custom.steps.length > 0) {
         testEntry.steps = custom.steps;
-    } else if (custom.iterations) {
+    } else if (custom.iterations && custom.iterations.length > 0) {
         testEntry.iterations = custom.iterations;
     }
 
@@ -54,17 +62,18 @@ const setup_tests_data = (custom) => {
 
 /**
  * Setup testInfo data for creating new tests in Jira
- * @param {Object} custom 
+ * @param {Partial<XrayTestData>} custom 
  * @returns {Object}
  */
 const setup_testInfo_data = (custom) => {
+    /** @type {Record<string, any>} */
     const info = {};
 
     info.projectKey = custom.testInfo_projectKey ?? "";
     info.summary = custom.testInfo_summary ?? "Test generated automatically";
     info.type = custom.testInfo_type ?? "Generic";
-    info.requirementKeys = custom.testInfo_requirementKeys ?? [];
-    info.labels = custom.testInfo_labels ?? "automated_test";
+    info.requirementKeys = [];
+    info.labels = custom.testInfo_labels ?? ["automated_test"];
 
     // Scenario logic based on test type
     if (info.type === "Generic") {

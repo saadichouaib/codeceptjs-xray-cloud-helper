@@ -1,5 +1,30 @@
+// @ts-check
 import Joi from 'joi';
 import process from 'node:process';
+
+/**
+ * @typedef {Object} XrayPluginConfig
+ * @property {string} require
+ * @property {boolean} enabled
+ * @property {boolean} debug
+ * @property {string} projectKey
+ * @property {string} [testExecutionAssigneeUserId]
+ * @property {boolean} importToExistingTestExecution
+ * @property {string} [existingTestExecutionKey]
+ * @property {string} [testExecutionPlanKey]
+ * @property {string} [testExecutionVersion]
+ * @property {string} [testExecutionRevision]
+ * @property {string[]} [testExecutionEnvironments]
+ * @property {string} [testExecutionSummary]
+ * @property {string} [testExecutionDescription]
+ * @property {boolean} testExecutionSendEvidenceOnFail
+ * @property {Object[]} [testExecutionCustomFields]
+ * @property {boolean} createNewJiraTest
+ * @property {number} timeout
+ * @property {string} xrayCloudUrl
+ * @property {string} xrayClientId
+ * @property {string} xraySecret
+ */
 
 const xray_import_schema = Joi.object({
     require: Joi.string().required(),
@@ -10,7 +35,7 @@ const xray_import_schema = Joi.object({
     importToExistingTestExecution: Joi.boolean().required(),
     existingTestExecutionKey: Joi.when('importToExistingTestExecution', { 
         is: true, 
-        then: Joi.string().required(),// NOSONAR then is part of Joi
+        then: Joi.string().required(),
         otherwise: Joi.string().allow('') 
     }),
     testExecutionPlanKey: Joi.string().allow(''),
@@ -24,7 +49,7 @@ const xray_import_schema = Joi.object({
     }),
     testExecutionDescription: Joi.when('importToExistingTestExecution', { 
         is: true, 
-        then: Joi.string().allow(''), // NOSONAR
+        then: Joi.string().allow(''),// NOSONAR
         otherwise: Joi.string().required() 
     }),
     testExecutionSendEvidenceOnFail: Joi.boolean().required(),
@@ -39,7 +64,7 @@ const xray_import_schema = Joi.object({
 const conf_schema_checker = {
     /**
      * Validate xrayImport plugin configuration
-     * @param {Object} config 
+     * @param {XrayPluginConfig} config 
      */
     validate: (config) => {
         const result = xray_import_schema.validate(config);
@@ -51,8 +76,8 @@ const conf_schema_checker = {
 
     /**
      * Ensure screenshotOnFail plugin is correctly configured if evidence sending is enabled
-     * @param {Object} codeceptjs 
-     * @param {Object} config 
+     * @param {any} codeceptjs 
+     * @param {XrayPluginConfig} config 
      */
     validate_option_testExecutionSendEvidenceOnFail: (codeceptjs, config) => {
         const pluginsConfig = codeceptjs.config.get().plugins;

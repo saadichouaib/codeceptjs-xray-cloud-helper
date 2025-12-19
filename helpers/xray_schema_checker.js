@@ -1,3 +1,4 @@
+// @ts-check
 import { validate } from 'jsonschema';
 import process from 'node:process';
 

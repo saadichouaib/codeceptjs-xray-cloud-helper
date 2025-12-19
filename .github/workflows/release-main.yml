@@ -1,0 +1,91 @@
+name: 🚀 Release & Publish
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish (e.g., 1.2.0) - Leave empty to use package.json'
+        required: false
+        type: string
+
+permissions:
+  contents: write
+  packages: write
+  issues: write
+  id-token: write # REQUIRED for OIDC/Provenance
+
+jobs:
+  test-and-release:
+    name: 🧪 Test & 🚀 Publish
+    runs-on: ubuntu-latest
+    
+    # Required for GitHub Actions to use OIDC with NPM Provenance
+    environment:
+      name: npm-publish
+
+    steps:
+      - name: ⬇️ Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.x"
+          cache: "yarn"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: ⬆️ Ensure Latest npm
+        run: |
+          npm install -g npm@latest
+          npm --version
+
+      - name: 🛠️ Install Dependencies
+        run: yarn install --frozen-lockfile
+
+      # --- TEST PHASE ---
+      # We must ensure tests pass before publishing. 
+      # We use the ESM flag we verified earlier.
+      - name: 🧪 Run Tests
+        run: yarn test:cov
+        env:
+          NODE_OPTIONS: "--experimental-vm-modules"
+
+      # --- VERSIONING PHASE ---
+      - name: 🆔 Get Package Info
+        id: package
+        run: |
+          if [ -n "${{ inputs.version }}" ]; then
+            VERSION="${{ inputs.version }}"
+            npm version $VERSION --no-git-tag-version
+          else
+            VERSION=$(node -p "require('./package.json').version")
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "📦 Target Version: $VERSION"
+
+      - name: 🚀 Publish to NPM
+        run: npm publish --provenance --access public --ignore-scripts
+
+      # --- RELEASE PHASE (GitHub) ---
+      - name: 🏷️ Create GitHub Release
+        if: success()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ steps.package.outputs.version }}
+        run: |
+          gh release create "v$VERSION" \
+            --title "v$VERSION" \
+            --generate-notes \
+            --target "main"
+
+      # --- GITHUB PACKAGES PHASE ---
+      - name: 📦 Publish to GitHub Packages
+        if: success()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Dynamically set the scoped name for GH Packages
+          npm pkg set name="@saadichouaib/codeceptjs-xray-cloud-helper"
+          npm config set @saadichouaib:registry=https://npm.pkg.github.com/
+          npm config set //npm.pkg.github.com/:_authToken="${GITHUB_TOKEN}"
+          npm publish --registry https://npm.pkg.github.com/

@@ -1,44 +1,87 @@
-module.exports = {
-    /**
-     * Handle axios errors
-     * @param {Error | *} error 
-     * @returns 
-     */
-    handle_axios_error(error) {
-        let errorMessage = {};
-        // Sanitizing error message from sensitive data
-        error = this.sanitize_error(error);
-        if (error.response) {
-            // Request made but the server responded with an error
-            errorMessage = error.response.data
-        } else if (error.request) {
-            // Request made but no response is received from the server.
+// @ts-check
+
+/**
+ * @typedef {Object} XrayErrorBody
+ * @property {string} [message]
+ * @property {string} [error]
+ * @property {number} [status]
+ * @property {string} [statusText]
+ * @property {any} [body]
+ */
+
+/**
+ * Error handling utility for Fetch API requests
+ * @param {any} error
+ * @returns {Promise<XrayErrorBody>}
+ */
+export async function handle_fetch_error(error) {
+    /** @type {XrayErrorBody} */
+    let errorMessage;
+
+    // 1. Handle Response objects
+    if (error instanceof Response) {
+        try {
+            errorMessage = await error.json();
+        } catch (e) {
             errorMessage = {
-                message : "No response from the server : ",
-                error
+                status: error.status,
+                statusText: error.statusText,
+                message: "Server returned an error without a JSON body"
+            };
+        }
+    } 
+    // 2. Handle Abort errors or standard Error objects
+    else if (error instanceof Error) {
+        if (error.name === 'AbortError') {
+            errorMessage = {
+                message: "The request timed out.",
+                error: error.message
             };
         } else {
-            // Error occured while setting up the request
             errorMessage = {
-                message:'Error while setting up the request' ,
-                error: error
+                message: error.message || "An unexpected error occurred",
+                error: JSON.stringify(sanitize_error(error))
             };
         }
-        return errorMessage;
-    },
-    /**
-     * 
-     * @param {*} error 
-     * @returns 
-     */
-    sanitize_error(error){
-        if (error.message) {
-            error.message = error.message.replace(/("client_id":"[^"]+",|"client_secret":"[^"]+")/g, '"<hidden>"');
-        }
-        if (error.config && error.config.data) {
-            error.config.data = error.config.data.replace(/"client_id":"[^"]+"/g, '"client_id":"*****"');
-            error.config.data = error.config.data.replace(/"client_secret":"[^"]+"/g, '"client_secret":"*****"');
-        }
-        return error;
     }
+    // 3. Fallback for unknown error types
+    else {
+        errorMessage = {
+            message: "An unknown error occurred",
+            error: String(error)
+        };
+    }
+
+    return errorMessage;
 }
+
+/**
+ * Sanitizes sensitive data like client_id and client_secret from logs
+ * @param {any} error 
+ * @returns {Record<string, any>}
+ */
+export function sanitize_error(error) {
+    const sanitized = { 
+        name: error?.name,
+        message: error?.message || "",
+        body: error?.body
+    };
+
+    if (typeof sanitized.message === 'string') {
+        // This regex handles both "client_id":"value" and escaped \"client_id\":\"value\"
+        sanitized.message = sanitized.message.replaceAll(
+            /\\?"(client_id|client_secret)\\?":\\?"[^"]+\\?"/g, 
+            '"$1":"<hidden>"'
+        );
+    }
+
+    if (typeof sanitized.body === 'string') {
+        sanitized.body = sanitized.body
+            .replaceAll(/"client_id":"[^"]+"/g, '"client_id":"*****"')
+            .replaceAll(/"client_secret":"[^"]+"/g, '"client_secret":"*****"');
+    }
+
+    return sanitized;
+}
+
+export default { handle_fetch_error, sanitize_error };

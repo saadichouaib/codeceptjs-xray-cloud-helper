@@ -1,117 +1,188 @@
-const axios = require('axios').default;
-const axiosFormData = require('axios-form-data');
-const colors = require('chalk');
-const process = require('process');
-const loading = require('loading-cli');
-const fs = require('fs');
-const api_errors = require('./api_errors');
+// @ts-check
+import colors from "chalk";
+import loading from "loading-cli";
+import fs from "node:fs";
+import process from "node:process";
+import api_errors from "./api_errors.js";
+
+/** * @typedef {import('./api_errors.js').XrayErrorBody} XrayErrorBody
+ */
+
+/** @type {any} */
 let load_auth;
+/** @type {any} */
 let load_import_execute;
+/** @type {any} */
 let load_import_cucumber;
 
-module.exports = {
+/**
+ * Xray - authenticate
+ * @param {string} xray_url
+ * @param {string} client_id
+ * @param {string} client_secret
+ * @param {number} [timeout]
+ * @returns {Promise<string>} Raw token string
+ */
+export async function authenticate(
+  xray_url,
+  client_id,
+  client_secret,
+  timeout = 120000
+) {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeout);
 
-    /**
-     * Xray - authenticate
-     *
-     * @param {String} xray_url
-     * @param {String} client_id
-     * @param {String} client_secret
-     * @returns {String} token
-     */
-    async authenticate(xray_url, client_id, client_secret, timeout = 120000) {
-        let response;
+  try {
+    load_auth = loading("Authentication ...").start();
 
-        const headers = {
-            'Content-Type': 'application/json',
-        };
+    const response = await fetch(`${xray_url}/api/v2/authenticate`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ client_id, client_secret }),
+      signal: controller.signal,
+    });
 
-        const body = {
-            client_id: client_id,
-            client_secret: client_secret
-        }
+    if (response.ok === false) throw response;
 
-        try {
-            load_auth = loading("Authentication ...").start();
-            response = await axios.post(`${xray_url}/api/v2/authenticate`, body, {headers: headers, timeout: timeout});
-        } catch (error) {
-            load_auth.stop();
-            const errorMessage = api_errors.handle_axios_error(error);
-            console.error(`Authentication error while importing Xray results, reason :\n`, errorMessage);
-            process.exit(1);
-        }
+    const data = await response.text();
+    // Xray returns a quoted string in some versions, clean it if necessary
+    const token = data.replace(/^"|"$/g, "");
 
-        load_auth.stop();
-        return response.data;
-    },
+    load_auth.stop();
+    return token;
+  } catch (error) {
+    if (load_auth) load_auth.stop();
+    const errorMessage = await api_errors.handle_fetch_error(error);
+    console.error(
+      `Authentication error while importing Xray results, reason :\n`,
+      errorMessage
+    );
+    process.exit(1);
+  } finally {
+    clearTimeout(id);
+  }
+}
 
-    /**
-     * Xray - execute import of results to Jira/Xray
-     *
-     * @param {String} xray_url
-     * @param {Object} body
-     * @param {String} token
-     * @returns {Object} response
-     */
-    async execute_import(xray_url, body, token, timeout = 12000) {
-        let response;
+/**
+ * Xray - execute import of results to Jira/Xray
+ * @param {string} xray_url
+ * @param {Object} body
+ * @param {string} token
+ * @param {number} [timeout]
+ * @returns {Promise<{data: any}>}
+ */
+export async function execute_import(xray_url, body, token, timeout = 12000) {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeout);
 
-        const headers = {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        };
+  try {
+    load_import_execute = loading("Importing results to Xray ...").start();
 
-        try {
-            load_import_execute = loading("Importing results to Xray ...").start();
-            response = await axios.post(`${xray_url}/api/v2/import/execution`, body, {headers: headers, timeout: timeout});
-        } catch (err) {
-            load_import_execute.stop();
-            const errorMessage = api_errors.handle_axios_error(err);
-            console.error(`Error while importing Xray results, reason :\n`, errorMessage);
-            process.exit(1);
-        }
+    const response = await fetch(`${xray_url}/api/v2/import/execution`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(body),
+      signal: controller.signal,
+    });
 
-        load_import_execute.stop();
-        return response;
-    },
+    if (response.ok === false) throw response;
 
-    /**
-     * Xray - Create Cucumber tests on Xray from feature files
-     *
-     * @param {String} xray_url
-     * @param {String} file_path
-     * @param {String} project_key
-     * @param {String} project_source
-     * @param {String} token
-     * @returns {Object} response
-     */
-    async import_cucumber_feature(xray_url, file_path, project_key, project_source, token, timeout = 12000) {
-        axios.interceptors.request.use(axiosFormData);
-        let response;
+    const data = await response.json();
+    load_import_execute.stop();
+    return { data };
+  } catch (err) {
+    if (load_import_execute) load_import_execute.stop();
+    const errorMessage = await api_errors.handle_fetch_error(err);
+    console.error(
+      `Error while importing Xray results, reason :\n`,
+      errorMessage
+    );
+    process.exit(1);
+  } finally {
+    clearTimeout(id);
+  }
+}
 
-        const headers = {
-            'Content-Type': 'multipart/form-data',
-            'Authorization': `Bearer ${token}`
-        };
+/**
+ * Xray - Create Cucumber tests on Xray from feature files
+ * @param {string} xray_url
+ * @param {string} file_path
+ * @param {string} project_key
+ * @param {string} project_source
+ * @param {string} token
+ * @param {number} [timeout]
+ * @returns {Promise<{data: any}>}
+ */
+export async function import_cucumber_feature(
+  xray_url,
+  file_path,
+  project_key,
+  project_source,
+  token,
+  timeout = 12000
+) {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeout);
 
-        try {
-            load_import_cucumber = loading(`Creating/Updating Cucumber tests on Xray from feature file ${file_path}...`).start();
-            response = await axios.post(`${xray_url}/api/v2/import/feature?projectKey=${project_key}`, {file: fs.createReadStream(file_path)}, {headers: headers, timeout: timeout});
-        } catch (err) {
-            load_import_cucumber.stop();
-            const errorMessage = api_errors.handle_axios_error(err);
-            console.error(`\nError while creating/updating Cucumber tests from feature file, reason :\n`, errorMessage);
-            process.exit(1);
-        }
+  try {
+    load_import_cucumber = loading(
+      `Creating/Updating Cucumber tests on Xray from feature file ${file_path}...`
+    ).start();
 
-        load_import_cucumber.stop();
+    const formData = new FormData();
+    const fileBuffer = fs.readFileSync(file_path);
+    const blob = new Blob([fileBuffer]);
+    formData.append("file", blob, "file.feature");
 
-        console.log(colors.bold.green('\nTests were created/updated syccessfully!'));
-        console.log('\nUpdated/created tests :');
-        response.data.updatedOrCreatedTests.forEach(test => {
-            console.log(colors.bold.green(`${test.key}\n`));
-        });
+    const response = await fetch(
+      `${xray_url}/api/v2/import/feature?projectKey=${project_key}`,
+      {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+        signal: controller.signal,
+      }
+    );
 
-        return response;
+    if (response.ok === false) throw response;
+
+    const data = await response.json();
+    load_import_cucumber.stop();
+
+    console.log(
+      colors.bold.green("\nTests were created/updated successfully!")
+    );
+
+    // Define the expected shape of the Xray response
+    /** @type {{ updatedOrCreatedTests: Array<{key: string}> }} */
+    const result = data;
+
+    if (
+      result.updatedOrCreatedTests &&
+      Array.isArray(result.updatedOrCreatedTests)
+    ) {
+      console.log("\nUpdated/created tests :");
+      result.updatedOrCreatedTests.forEach((test) => {
+        // 'test' is now correctly inferred as { key: string }
+        console.log(colors.bold.green(`${test.key}\n`));
+      });
     }
-};
+
+    return { data };
+  } catch (err) {
+    if (load_import_cucumber) load_import_cucumber.stop();
+    const errorMessage = await api_errors.handle_fetch_error(err);
+    console.error(
+      `\nError while creating/updating Cucumber tests from feature file, reason :\n`,
+      errorMessage
+    );
+    process.exit(1);
+  } finally {
+    clearTimeout(id);
+  }
+}
+
+export default { authenticate, execute_import, import_cucumber_feature };
